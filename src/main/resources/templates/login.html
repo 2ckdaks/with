@@ -20,6 +20,7 @@
 
 <div class="container mt-3">
     <form action="/login" method="POST">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
         <div class="form-group">
             <label>id</label>
             <input type="text" class="form-control" name="username" />

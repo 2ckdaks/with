@@ -78,7 +78,7 @@ public class PostService {
         String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
         String postOwner = post.get().getWriter();
 
-        if (loggedInUsername != postOwner ) {
+        if (!loggedInUsername.equals(postOwner)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("삭제 권한이 없습니다.");
         }
 

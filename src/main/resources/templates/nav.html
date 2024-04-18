@@ -2,6 +2,12 @@
     <a href="/" class="logo">WITH</a>
     <a href="/list">List</a>
     <a href="/write">Write</a>
-    <a href="/login">Login</a>
-    <a href="/my-page">MyPage</a>
+    <a th:if="${session.user != null}" href="/my-page">MyPage</a>  <!-- 로그인 시에만 'MyPage' 보임 -->
+    <a th:if="${session.user == null}" href="/login">Login</a>      <!-- 로그인 안 했을 때만 'Login' 보임 -->
+
+    <!-- 로그아웃 버튼 (로그인 시에만 보임) -->
+    <form th:if="${session.user != null}" action="/logout" method="post" th:action="@{/logout}">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}" /> <!-- CSRF 토큰 추가 -->
+        <button type="submit">Logout</button>
+    </form>
 </div>
