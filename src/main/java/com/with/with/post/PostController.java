@@ -6,9 +6,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -35,5 +37,16 @@ public class PostController {
         postService.createPost(postDto, authentication);
 
         return "redirect:/";
+    }
+
+    @GetMapping("/detail/{id}")
+    public String findOne(@PathVariable Long id, Model model) {
+        Optional<Post> post = postService.findOne(id);
+        if (post.isPresent()) {
+            model.addAttribute("post", post.get());
+            return "detail.html";
+        } else {
+            return "redirect:/list";
+        }
     }
 }

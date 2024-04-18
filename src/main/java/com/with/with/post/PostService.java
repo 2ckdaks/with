@@ -3,14 +3,12 @@ package com.with.with.post;
 import com.with.with.member.CustomUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +20,9 @@ public class PostService {
         return postRepository.findAll();  // List<Post> 반환
     }
 
+    public Optional<Post> findOne(Long id) {
+        return postRepository.findById(id);
+    }
 
     @Transactional
     public Post createPost(PostDto postDto, Authentication authentication){

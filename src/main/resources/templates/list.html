@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -29,7 +29,7 @@
             <p> 모집인원 : <span th:text="${post.personnel}"></span> 명 </p>
             <p> 작성자 : <span th:text="${post.writer}"></span> </p>
             <button class="btn btn-danger delete" th:attr="data-id=${post.id}">삭제 / 가리기</button>
-            <a th:href="@{'/chat/' + ${post.id}}">
+            <a th:href="@{'/detail/' + ${post.id}}">
                 <button class="btn btn-danger" th:id="${post.id}" th:attr="data-id=${post.id}">참여</button>
             </a>
         </li>
