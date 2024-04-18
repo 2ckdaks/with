@@ -32,4 +32,15 @@ public class MemberController {
 //        System.out.println(memberRepository.findByUsername("username"));
         return "login.html";
     }
+
+    @GetMapping("/my-page")
+    public String myPage(Authentication authentication){
+        System.out.println(authentication);
+        System.out.println(authentication.getName());
+        CustomUser result = ( CustomUser ) authentication.getPrincipal();
+        System.out.println(result.displayName);
+        System.out.println(result.userType);
+
+        return "mypage.html";
+    }
 }

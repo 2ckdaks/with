@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link href="/main.css" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{ nav.html::navbar }"></div>
+<h4>마이페이지</h4>
+<div th:text="${#authentication.principal.username}">Username</div>
+<div th:text="${#authentication.principal.displayName}">Display Name</div>
+<div th:text="${#authentication.principal.userType}">User Type</div>
+<div th:if="${#authorization.expression('isAuthenticated()')}">  <!-- 로그인한 사람만 보여줌 (반대도가능) -->
+    <h4>일반 유저님 ㅎㅇ</h4>
+</div>
+</body>
+</html>

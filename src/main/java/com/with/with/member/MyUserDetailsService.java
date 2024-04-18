@@ -35,6 +35,7 @@ public class MyUserDetailsService implements UserDetailsService {
 
         var customUser = new CustomUser(user.getUsername(), user.getPassword(), authority);
         customUser.displayName = user.getDisplayName();
+        customUser.userType = user.getUserType();
 
         return customUser;
     }
@@ -42,6 +43,7 @@ public class MyUserDetailsService implements UserDetailsService {
 
 class CustomUser extends User {
     public String displayName;
+    public String userType;
     public CustomUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
     }
