@@ -49,7 +49,26 @@
     <a th:href="@{'/edit/' + ${post.id}}">
         <button class="btn btn-danger">수정</button>
     </a>
+    <button class="btn btn-danger" th:onclick="'deletePost(' + ${post.id} + ');'">삭제</button>
 </div>
+
+<script th:inline="javascript">
+    function deletePost(id) {
+        fetch('/post?id=' + id, { method: 'DELETE' })
+        .then(response => {
+            if (response.ok) {
+                alert('게시물이 삭제되었습니다.');
+                window.location.href = '/list'; // 삭제 후 목록 페이지로 리다이렉션
+            } else {
+                alert('게시물 삭제에 실패했습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('게시물 삭제 중 오류가 발생했습니다.');
+        });
+    }
+</script>
 
 <script
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
