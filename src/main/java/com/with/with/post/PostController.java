@@ -69,12 +69,7 @@ public class PostController {
 
     //query string으로 받은경우
     @DeleteMapping("/post")
-    public ResponseEntity<?> deletePost(@RequestParam Long id){
-        try {
-            postRepository.deleteById(id);
-            return ResponseEntity.ok().build(); // 성공적으로 처리되었다는 응답
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("삭제 실패");
-        }
+    public ResponseEntity<String> deletePost(@RequestParam Long id, Authentication authentication) {
+        return postService.deletePost(id, authentication);
     }
 }
