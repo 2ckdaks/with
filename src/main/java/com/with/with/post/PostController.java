@@ -49,4 +49,21 @@ public class PostController {
             return "redirect:/list";
         }
     }
+
+    @GetMapping("/edit/{id}")
+    public String update(@PathVariable Long id, Model model) {
+        Optional<Post> post = postService.findOne(id);
+        if (post.isPresent()){
+            model.addAttribute("post", post.get());
+            return "edit.html";
+        } else {
+            return "redirect:/list";
+        }
+    }
+
+    @PostMapping("/edit/{id}")
+    public String updatePost(@PathVariable Long id, @ModelAttribute PostDto postDto, Authentication authentication) {
+        postService.updatePost(postDto, id, authentication);
+        return "redirect:/detail/" + id;
+    }
 }

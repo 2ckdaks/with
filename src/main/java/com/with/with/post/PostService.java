@@ -34,19 +34,29 @@ public class PostService {
         newPost.setDate(postDto.getDate());
         newPost.setTime(postDto.getTime());
         newPost.setPersonnel(postDto.getPersonnel());
-//        newPost.setWriter(postDto.getWriter());
         newPost.setWriter(user.displayName);
-
-
-        // 하드코딩된 값으로 설정
-//        newPost.setStartPoint("서울역");
-//        newPost.setEndPoint("부산역");
-//        newPost.setDate(LocalDate.of(2024, 4, 15));
-//        newPost.setTime(LocalTime.of(13, 30));
-//        newPost.setPersonnel(4);
-//        newPost.setWriter("홍길동");
 
         Post savedPost = postRepository.save(newPost);
         return savedPost;
+    }
+
+    public Post updatePost(PostDto postDto, Long id, Authentication authentication) {
+        Optional<Post> existingPost = postRepository.findById(id);
+        if (existingPost.isPresent()) {
+            Post post = existingPost.get();
+
+            post.setStartPoint(postDto.getStartPoint());
+            post.setEndPoint(postDto.getEndPoint());
+            post.setDate(postDto.getDate());
+            post.setTime(postDto.getTime());
+            post.setPersonnel(postDto.getPersonnel());
+
+            CustomUser user = (CustomUser) authentication.getPrincipal();
+            post.setWriter(user.displayName);
+
+            return postRepository.save(post);
+        } else {
+            throw new IllegalArgumentException("수정에 실패했습니다");
+        }
     }
 }
