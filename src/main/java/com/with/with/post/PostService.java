@@ -45,22 +45,28 @@ public class PostService {
 
     public Post updatePost(PostDto postDto, Long id, Authentication authentication) {
         Optional<Post> existingPost = postRepository.findById(id);
-        if (existingPost.isPresent()) {
-            Post post = existingPost.get();
-
-            post.setStartPoint(postDto.getStartPoint());
-            post.setEndPoint(postDto.getEndPoint());
-            post.setDate(postDto.getDate());
-            post.setTime(postDto.getTime());
-            post.setPersonnel(postDto.getPersonnel());
-
-            CustomUser user = (CustomUser) authentication.getPrincipal();
-            post.setWriter(user.getUsername());
-
-            return postRepository.save(post);
-        } else {
-            throw new IllegalArgumentException("수정에 실패했습니다");
+        if (!existingPost.isPresent()) {
+            throw new IllegalArgumentException("게시물을 찾을 수 없습니다.");
         }
+
+        Post post = existingPost.get();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String loggedInUsername = userDetails.getUsername();
+        String postOwner = post.getWriter();
+
+        if (!loggedInUsername.equals(postOwner)) {
+            throw new SecurityException("수정 권한이 없습니다.");
+        }
+
+        // 입력된 데이터로 게시물 업데이트
+        post.setStartPoint(postDto.getStartPoint());
+        post.setEndPoint(postDto.getEndPoint());
+        post.setDate(postDto.getDate());
+        post.setTime(postDto.getTime());
+        post.setPersonnel(postDto.getPersonnel());
+        post.setWriter(loggedInUsername); // 현재 로그인한 사용자의 username으로 설정
+
+        return postRepository.save(post);
     }
 
     public ResponseEntity<String> deletePost(Long id, Authentication authentication) {
