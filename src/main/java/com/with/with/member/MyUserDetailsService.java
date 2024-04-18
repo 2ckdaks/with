@@ -41,10 +41,3 @@ public class MyUserDetailsService implements UserDetailsService {
     }
 }
 
-class CustomUser extends User {
-    public String displayName;
-    public String userType;
-    public CustomUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, authorities);
-    }
-}

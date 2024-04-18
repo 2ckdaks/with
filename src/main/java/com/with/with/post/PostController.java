@@ -1,6 +1,7 @@
 package com.with.with.post;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,9 +30,9 @@ public class PostController {
     }
 
     @PostMapping("/add-write")
-    String addPost(@ModelAttribute PostDto postDto){
+    String addPost(@ModelAttribute PostDto postDto, Authentication authentication){
 
-        postService.createPost(postDto);
+        postService.createPost(postDto, authentication);
 
         return "redirect:/";
     }
