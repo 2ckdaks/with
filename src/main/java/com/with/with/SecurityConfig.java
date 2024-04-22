@@ -39,6 +39,10 @@ public class SecurityConfig {
                 formLogin.loginPage("/login").defaultSuccessUrl("/list")
         );
         http.logout(logout -> logout.logoutUrl("/logout"));
+        http.rememberMe(rememberMe -> rememberMe
+                .key("uniqueAndSecret") // 설정한 키를 사용하여 토큰을 생성
+                .tokenValiditySeconds(86400) // 토큰 유효 기간 설정 (여기서는 24시간)
+        );
         return http.build();
     }
 
