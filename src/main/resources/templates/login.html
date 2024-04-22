@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -15,29 +15,31 @@
     />
 </head>
 <body>
-<div th:replace="~{ nav.html::navbar }"></div>
-<h4 class="ml-2 my-3 text-center">로그인</h4>
+<div class="container">
+    <div th:replace="~{ nav.html::navbar }"></div>
+    <h4 class="ml-2 my-3 text-center">로그인</h4>
 
-<div class="container mt-3">
-    <form action="/login" method="POST">
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-        <div class="form-group">
-            <label>id</label>
-            <input type="text" class="form-control" name="username" />
-        </div>
-        <div class="form-group">
-            <label>password</label>
-            <input type="password" class="form-control" name="password" />
-        </div>
-        <div class="form-group">
-            <label>자동 로그인</label>
-            <input type="checkbox" name="remember-me">
-        </div>
-        <button type="submit" class="btn btn-danger">로그인</button>
-    </form>
+    <div class="container mt-3">
+        <form action="/login" method="POST">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+            <div class="form-group">
+                <label>id</label>
+                <input type="text" class="form-control" name="username" />
+            </div>
+            <div class="form-group">
+                <label>password</label>
+                <input type="password" class="form-control" name="password" />
+            </div>
+            <div class="form-group">
+                <label>자동 로그인</label>
+                <input type="checkbox" name="remember-me">
+            </div>
+            <button type="submit" class="btn btn-danger">로그인</button>
+        </form>
 
-    <div th:if="${param.error}">
-        <h4>아이디 또는 비밀번호가 올바르지 않습니다.</h4>
+        <div th:if="${param.error}">
+            <h4>아이디 또는 비밀번호가 올바르지 않습니다.</h4>
+        </div>
     </div>
 </div>
 </body>

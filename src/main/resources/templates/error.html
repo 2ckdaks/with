@@ -15,12 +15,14 @@
     />
 </head>
 <body>
-<div th:replace="~{ nav.html::navbar }"></div>
-<h4>Error Page</h4>
-<p>Status: <span th:text="${status}"></span></p>
-<p>Error: <span th:text="${error}"></span></p>
-<p>Path: <span th:text="${path}"></span></p>
-<p>Message: <span th:text="${message}"></span></p>
-<p>Exception Type: <span th:text="${exception}"></span></p>
+<div class="container">
+    <div th:replace="~{ nav.html::navbar }"></div>
+    <h4>Error Page</h4>
+    <p>Status: <span th:text="${status}"></span></p>
+    <p>Error: <span th:text="${error}"></span></p>
+    <p>Path: <span th:text="${path}"></span></p>
+    <p>Message: <span th:text="${message}"></span></p>
+    <p>Exception Type: <span th:text="${exception}"></span></p>
+</div>
 </body>
 </html>

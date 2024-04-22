@@ -7,15 +7,18 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <link href="/main.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
 </head>
 <body>
-<div th:replace="~{ nav.html::navbar }"></div>
-<h4>마이페이지</h4>
-<div th:text="${#authentication.principal.username}">Username</div>
-<div th:text="${#authentication.principal.displayName}">Display Name</div>
-<div th:text="${#authentication.principal.userType}">User Type</div>
-<div th:if="${#authorization.expression('isAuthenticated()')}">  <!-- 로그인한 사람만 보여줌 (반대도가능) -->
-    <h4>일반 유저님 ㅎㅇ</h4>
+<div class="container">
+    <div th:replace="~{ nav.html::navbar }"></div>
+    <h4>마이페이지</h4>
+    <div th:text="${#authentication.principal.username}">Username</div>
+    <div th:text="${#authentication.principal.displayName}">Display Name</div>
+    <div th:text="${#authentication.principal.userType}">User Type</div>
+    <div th:if="${#authorization.expression('isAuthenticated()')}">  <!-- 로그인한 사람만 보여줌 (반대도가능) -->
+        <h4>일반 유저님 ㅎㅇ</h4>
+    </div>
 </div>
 </body>
 </html>

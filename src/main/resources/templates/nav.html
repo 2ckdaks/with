@@ -1,17 +1,19 @@
-<div class="nav" th:fragment="navbar">
-    <a href="/" class="logo">WITH</a>
-    <a href="/list">List</a>
-    <a href="/write">Write</a>
+<div class="nav-container">
+    <div class="nav" th:fragment="navbar">
+        <a href="/" class="logo">WITH</a>
+        <a href="/list">List</a>
+        <a href="/write">Write</a>
 
-    <!-- 로그인 시에만 'MyPage' 보임 -->
-    <a th:if="${#authorization.expression('isAuthenticated()')}" href="/my-page">MyPage</a>
+        <!-- 로그인 시에만 'MyPage' 보임 -->
+        <a th:if="${#authorization.expression('isAuthenticated()')}" href="/my-page">MyPage</a>
 
-    <!-- 로그인 안 했을 때만 'Login' 보임 -->
-    <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/login">Login</a>
+        <!-- 로그인 안 했을 때만 'Login' 보임 -->
+        <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/login">Login</a>
 
-    <!-- 로그아웃 버튼 (로그인 시에만 보임) -->
-    <form th:if="${#authorization.expression('isAuthenticated()')}" action="/logout" method="post">
-        <input type="hidden" name="_csrf" th:value="${_csrf.token}" /> <!-- CSRF 토큰 추가 -->
-        <button type="submit">Logout</button>
-    </form>
+        <!-- 로그아웃 버튼 (로그인 시에만 보임) -->
+        <form th:if="${#authorization.expression('isAuthenticated()')}" action="/logout" method="post">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}" /> <!-- CSRF 토큰 추가 -->
+            <button type="submit">Logout</button>
+        </form>
+    </div>
 </div>

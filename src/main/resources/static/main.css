@@ -1,20 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap');
 .nav {
- display: flex;
- padding: 10px;
- align-items: center;
- font-family : 'Montserrat';
-}
-.nav a {
- margin-right: 10px;
- text-decoration : none;
- font-weight : 400;
- letter-spacing : -0.5px;
-}
-.nav .logo {
- font-weight : 800;
+    display: flex;
+    padding: 10px;
+    align-items: center;
+    font-family: 'Montserrat';
+    width: 100%; /* 네비게이션 바의 폭을 전체 폭으로 설정 */
 }
 
-body{
-    margin:0;
+.container {
+    width: 80%; /* 내용 컨테이너 폭을 80%로 설정하여 가운데 정렬될 수 있도록 함 */
+    margin: auto; /* 상하 마진은 자동으로 설정하여 가운데 정렬 */
+}
+
+.nav a {
+    margin-right: 10px;
+    text-decoration: none;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+}
+
+.nav .logo {
+    font-weight: 800;
+}
+
+body {
+    margin: 0;
 }
