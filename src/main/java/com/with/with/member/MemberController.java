@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
@@ -14,6 +16,7 @@ public class MemberController {
 
     private final MemberRepository memberRepository;
     private final MemberService memberService;
+    private final S3Service s3Service;
 
     @GetMapping("/sign-up")
     public String signUp(){
@@ -26,6 +29,15 @@ public class MemberController {
         memberService.addMember(username, password, displayName, userType);
 
         return "redirect:/login";
+    }
+
+    @GetMapping("/presigned-url")
+    @ResponseBody
+    String getURL(@RequestParam String filename){
+        var result = s3Service.createPreSignedUrl("profile/" + filename);
+        System.out.println(result);
+
+        return result;
     }
 
     @GetMapping("/login")

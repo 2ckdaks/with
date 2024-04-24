@@ -20,6 +20,7 @@
     <h4 class="ml-2 my-3 text-center">회원가입</h4>
 
     <div class="container mt-3">
+        <img src="">
         <form action="/sign-up" method="POST">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="form-group">
@@ -35,6 +36,10 @@
                 <input type="text" class="form-control" name="displayName" />
             </div>
             <div class="form-group">
+                <label>Profile Image</label>
+                <input type="file" onchange="getURL(this)" class="form-control" name="profileImage" />
+            </div>
+            <div class="form-group">
                 <label>user type</label>
                 <select name="userType">
                     <option>승객</option>
@@ -45,5 +50,23 @@
         </form>
     </div>
 </div>
+
+<script>
+    async function getURL(e){
+        let name = encodeURIComponent(e.files[0].name)
+        let result = await fetch('/presigned-url?filename=' + name)
+        result = await result.text();
+
+        let res = await fetch(result, {
+          method: 'PUT',
+          body: e.files[0]
+        })
+        console.log(res);
+        console.log(res.url.split("?")[0])
+        if (res.ok) {
+            document.querySelector('img').src = res.url.split("?")[0];
+        }
+    }
+</script>
 </body>
 </html>
