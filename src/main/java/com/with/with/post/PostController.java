@@ -1,6 +1,8 @@
 package com.with.with.post;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,12 +33,21 @@ public class PostController {
         return "list.html";  // 해당 뷰에 posts 데이터를 전달
     }
 
+    @GetMapping("/list/page/{number}")
+    String getListPage(Model model, @PathVariable Integer number){
+        Page<Post> posts = postRepository.findPageBy(PageRequest.of(number-1, 5));
+        System.out.println(posts.getTotalPages());
+        model.addAttribute("posts", posts);
+
+        return "list.html";
+    }
+
     @PostMapping("/add-write")
     String addPost(@ModelAttribute PostDto postDto, Authentication authentication){
 
         postService.createPost(postDto, authentication);
 
-        return "redirect:/";
+        return "redirect:/list/page/1";
     }
 
     @GetMapping("/detail/{id}")
