@@ -23,4 +23,6 @@ public class Member {
     private String displayName;
 
     private String userType;
+
+    private String profileImageUrl;
 }

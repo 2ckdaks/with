@@ -24,9 +24,9 @@ public class MemberController {
     }
 
     @PostMapping("/sign-up")
-    public String addMember(String username, String password, String displayName, String userType){
+    public String addMember(String username, String password, String displayName, String userType, String profileImageUrl){
 
-        memberService.addMember(username, password, displayName, userType);
+        memberService.addMember(username, password, displayName, userType, profileImageUrl);
 
         return "redirect:/login";
     }

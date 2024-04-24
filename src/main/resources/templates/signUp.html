@@ -23,6 +23,7 @@
         <img src="">
         <form action="/sign-up" method="POST">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" name="profileImageUrl" id="profileImageUrl">
             <div class="form-group">
                 <label>id</label>
                 <input type="text" class="form-control" name="username" />
@@ -65,6 +66,7 @@
         console.log(res.url.split("?")[0])
         if (res.ok) {
             document.querySelector('img').src = res.url.split("?")[0];
+            document.getElementById('profileImageUrl').value = result.split("?")[0];
         }
     }
 </script>

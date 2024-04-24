@@ -13,7 +13,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void addMember(String username, String password, String displayName, String userType){
+    public void addMember(String username, String password, String displayName, String userType, String profileImageUrl){
         Member member = new Member();
 
 //        String hashPassword = new BCryptPasswordEncoder().encode(password);
@@ -24,6 +24,7 @@ public class MemberService {
         member.setPassword(hashPassword); //해싱해줘야함
         member.setDisplayName(displayName);
         member.setUserType(userType);
+        member.setProfileImageUrl(profileImageUrl);
 
         memberRepository.save(member);
     }

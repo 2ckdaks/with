@@ -15,6 +15,7 @@
         <h4 class="ml-2 my-3 text-center">마이페이지</h4>
 
         <div class="container mt-3">
+            <img th:src="${#authentication.principal.profileImageUrl}" alt="Profile Image">
             <form>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <div class="form-group">
