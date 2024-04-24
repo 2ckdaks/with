@@ -2,6 +2,7 @@ package com.with.with.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +30,12 @@ public class MemberController {
 
     @GetMapping("/login")
     public String login(){
-//        System.out.println(memberRepository.findByUsername("username"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // 이미 인증된 사용자인지 확인 (remember-me 포함)
+        if (authentication != null && authentication.isAuthenticated() && !(authentication.getPrincipal() instanceof String)) {
+            // 인증된 사용자가 'anonymousUser'가 아닌 경우
+            return "redirect:/my-page";
+        }
         return "login.html";
     }
 
