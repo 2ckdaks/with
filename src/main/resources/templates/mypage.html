@@ -31,6 +31,10 @@
                     <input type="text" class="form-control" th:value="${#authentication.principal.userType}" readonly>
                 </div>
             </form>
+
+            <a th:href="@{'/review/' + ${#authentication.principal.username}}">
+                <button class="btn btn-success">방명록</button>
+            </a>
         </div>
     </div>
 </body>
