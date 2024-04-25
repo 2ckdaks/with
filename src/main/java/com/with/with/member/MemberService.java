@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -35,8 +36,8 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    public Optional<Review> findReivew(Long id) {
-        return reviewRepository.findById(id);
+    public List<Review> findReviewsByTarget(String targetId) {
+        return reviewRepository.findAllByTarget(targetId);
     }
 
     @Transactional

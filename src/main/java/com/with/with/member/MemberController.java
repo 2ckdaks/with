@@ -66,9 +66,12 @@ public class MemberController {
     }
 
     @GetMapping("/review/{id}")
-    public String reviewsByUserId(@PathVariable String id, Model model){
-        model.addAttribute("targetId", id);
-        return "review.html";
+    public String reviewsByUserId(@PathVariable String id, Model model) {
+        List<Review> reviews = memberService.findReviewsByTarget(id);
+        model.addAttribute("targetId", id);  // 리뷰 대상자의 ID를 모델에 추가
+        model.addAttribute("reviews", reviews);  // 조회된 리뷰 목록을 모델에 추가
+        System.out.println(reviews);
+        return "review.html";  // 리뷰 페이지를 반환
     }
 
 

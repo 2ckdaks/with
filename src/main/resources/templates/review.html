@@ -16,10 +16,10 @@
     <h4 class="ml-2 my-3 text-center">방명록</h4>
 
     <ul class="list-group" id="reviewList">
-        <li class="list-group-item">
-            <p> 글번호 : <span></span> </p>
-            <p> 리뷰 : <span></span> </p>
-            <p> 작성자 : <span></span> </p>
+        <li th:each="reviews : ${reviews}" class="list-group-item">
+            <p> 글번호 : <span th:text="${reviews.id}"></span> </p>
+            <p> 리뷰 : <span th:text="${reviews.review}"></span> </p>
+            <p> 작성자 : <span th:text="${reviews.writer}"></span> </p>
         </li>
     </ul>
 
