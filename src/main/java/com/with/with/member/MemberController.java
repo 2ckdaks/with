@@ -67,10 +67,10 @@ public class MemberController {
 
     @GetMapping("/review/{id}")
     public String reviewsByUserId(@PathVariable String id, Model model){
-        List<Review> reviews = reviewRepository.findAllByTarget(id);
-        model.addAttribute("reviews", reviews);
-        return "review.html";  // 모든 리뷰를 보여주는 HTML 페이지
+        model.addAttribute("targetId", id);
+        return "review.html";
     }
+
 
     @PostMapping("/add-review")
     String addReview(@ModelAttribute ReviewDto reviewDto, Authentication authentication){
