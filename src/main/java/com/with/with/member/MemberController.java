@@ -1,20 +1,23 @@
 package com.with.with.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberRepository memberRepository;
+    private final ReviewRepository reviewRepository;
     private final MemberService memberService;
     private final S3Service s3Service;
 
@@ -60,5 +63,20 @@ public class MemberController {
         System.out.println(result.userType);
 
         return "mypage.html";
+    }
+
+    @GetMapping("/review/{id}")
+    public String reviewsByUserId(@PathVariable String id, Model model){
+        List<Review> reviews = reviewRepository.findAllByTarget(id);
+        model.addAttribute("reviews", reviews);
+        return "review.html";  // 모든 리뷰를 보여주는 HTML 페이지
+    }
+
+    @PostMapping("/add-review")
+    String addReview(@ModelAttribute ReviewDto reviewDto, Authentication authentication){
+
+        memberService.createReview(reviewDto, authentication);
+
+        return "redirect:/review/" + reviewDto.getTarget();
     }
 }

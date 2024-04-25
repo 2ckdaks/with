@@ -57,7 +57,7 @@ public class PostController {
             model.addAttribute("post", post.get());
             return "detail.html";
         } else {
-            return "redirect:/list";
+            return "redirect:/";
         }
     }
 
