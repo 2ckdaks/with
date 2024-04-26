@@ -25,11 +25,15 @@
             <div class="form-group">
                 <label>출발지</label>
                 <input type="text" class="form-control" id="startPoint" name="startPoint" readonly />
+                <input type="hidden" id="startLatitude" name="startLatitude">
+                <input type="hidden" id="startLongitude" name="startLongitude">
                 <button type="button" class="btn btn-outline-secondary" onclick="searchAddress('startPoint')">검색</button>
             </div>
             <div class="form-group">
                 <label>도착지</label>
                 <input type="text" class="form-control" id="endPoint" name="endPoint" readonly />
+                <input type="hidden" id="endLatitude" name="endLatitude">
+                <input type="hidden" id="endLongitude" name="endLongitude">
                 <button type="button" class="btn btn-outline-secondary" onclick="searchAddress('endPoint')">검색</button>
             </div>
 
@@ -47,6 +51,7 @@
             </div>
             <br />
             <button type="submit" class="btn btn-danger">등록</button>
+            <button type="button" class="btn btn-danger" onclick="logFormData()">테스트</button>
         </form>
     </div>
 </div>
@@ -57,34 +62,59 @@
         crossorigin="anonymous">
 </script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${apiKey} + '&libraries=services'"></script>
 <script>
     function searchAddress(inputId) {
     new daum.Postcode({
         oncomplete: function(data) {
-            var fullAddress = ''; // 전체 주소
-            var extraAddress = ''; // 추가 주소
-
-            if(data.userSelectedType === 'R'){ // 사용자가 도로명 주소를 선택했을 경우
-                fullAddress = data.roadAddress; // 도로명 주소
-            } else { // 사용자가 지번 주소를 선택했을 경우
-                fullAddress = data.jibunAddress; // 지번 주소
+            var fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+            var extraAddress = '';
+            if (data.buildingName && data.apartment === 'Y') {
+                extraAddress = ', ' + data.buildingName;
             }
-
-            if(data.userSelectedType === 'R'){
-                // 건물명이 있고, 공동주택일 경우 추가 정보를 포함시킨다
-                if(data.buildingName && data.apartment === 'Y'){
-                    extraAddress += (extraAddress !== '' ? ', ' + data.buildingName : data.buildingName);
-                }
-                fullAddress += (extraAddress !== '' ? ' ('+ extraAddress +')' : '');
-            }
-
-            document.getElementById(inputId).value = fullAddress; // 입력 필드에 주소를 표시
+            fullAddress += extraAddress ? ' (' + extraAddress + ')' : '';
+            document.getElementById(inputId).value = fullAddress;
+            geocodeAddress(fullAddress, inputId);
         }
     }).open();
 }
 
+    function geocodeAddress(address, inputId) {
+    var geocoder = new kakao.maps.services.Geocoder();
+    geocoder.addressSearch(address, function(results, status) {
+        if (status === kakao.maps.services.Status.OK) {
+            var result = results[0];
+            if (inputId === 'startPoint') {
+                document.getElementById('startLatitude').value = result.y;
+                document.getElementById('startLongitude').value = result.x;
+            } else if (inputId === 'endPoint') {
+                document.getElementById('endLatitude').value = result.y;
+                document.getElementById('endLongitude').value = result.x;
+            }
+        }
+    });
+}
 </script>
+<script>
+    function logFormData() {
+        const startPoint = document.getElementById('startPoint').value;
+        const startLatitude = document.getElementById('startLatitude').value;
+        const startLongitude = document.getElementById('startLongitude').value;
+        const endPoint = document.getElementById('endPoint').value;
+        const endLatitude = document.getElementById('endLatitude').value;
+        const endLongitude = document.getElementById('endLongitude').value;
+        const date = document.querySelector('input[name="date"]').value; // 변경된 부분
+        const time = document.querySelector('input[name="time"]').value; // 변경된 부분
+        const personnel = document.querySelector('input[name="personnel"]').value; // 변경된 부분
 
+        // 출발지, 도착지, 좌표값, 날짜, 시간, 모집인원을 로그에 출력
+        console.log(
+            '출발지:', startPoint, '출발지 위도:', startLatitude, '출발지 경도:', startLongitude,
+            '도착지:', endPoint, '도착지 위도:', endLatitude, '도착지 경도:', endLongitude,
+            '날짜:', date, '시간:', time, '모집인원:', personnel
+        );
+    }
+</script>
 
 </body>
 </html>

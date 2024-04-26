@@ -33,7 +33,11 @@ public class PostService {
 
         Post newPost = new Post();
         newPost.setStartPoint(postDto.getStartPoint());
+        newPost.setStartLatitude(postDto.getStartLatitude()); // 출발지 위도
+        newPost.setStartLongitude(postDto.getStartLongitude()); // 출발지 경도
         newPost.setEndPoint(postDto.getEndPoint());
+        newPost.setEndLatitude(postDto.getEndLatitude()); // 도착지 위도
+        newPost.setEndLongitude(postDto.getEndLongitude()); // 도착지 경도
         newPost.setDate(postDto.getDate());
         newPost.setTime(postDto.getTime());
         newPost.setPersonnel(postDto.getPersonnel());
@@ -43,6 +47,7 @@ public class PostService {
         return savedPost;
     }
 
+
     public Post updatePost(PostDto postDto, Long id, Authentication authentication) {
         Optional<Post> existingPost = postRepository.findById(id);
         if (!existingPost.isPresent()) {
@@ -50,24 +55,28 @@ public class PostService {
         }
 
         Post post = existingPost.get();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String loggedInUsername = userDetails.getUsername();
-        String postOwner = post.getWriter();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
 
-        if (!loggedInUsername.equals(postOwner)) {
+        // 작성자와 로그인한 사용자가 다르면 수정 권한이 없음을 알림
+        if (!post.getWriter().equals(user.getUsername())) {
             throw new SecurityException("수정 권한이 없습니다.");
         }
 
         // 입력된 데이터로 게시물 업데이트
         post.setStartPoint(postDto.getStartPoint());
+        post.setStartLatitude(postDto.getStartLatitude()); // 출발지 위도
+        post.setStartLongitude(postDto.getStartLongitude()); // 출발지 경도
         post.setEndPoint(postDto.getEndPoint());
+        post.setEndLatitude(postDto.getEndLatitude()); // 도착지 위도
+        post.setEndLongitude(postDto.getEndLongitude()); // 도착지 경도
         post.setDate(postDto.getDate());
         post.setTime(postDto.getTime());
         post.setPersonnel(postDto.getPersonnel());
-        post.setWriter(loggedInUsername); // 현재 로그인한 사용자의 username으로 설정
+        post.setWriter(user.getUsername()); // 현재 로그인한 사용자의 username으로 설정
 
         return postRepository.save(post);
     }
+
 
     public ResponseEntity<String> deletePost(Long id, Authentication authentication) {
         Optional<Post> post = postRepository.findById(id);

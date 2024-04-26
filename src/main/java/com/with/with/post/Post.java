@@ -19,13 +19,25 @@ public class Post {
     private String startPoint;
 
     @Column(nullable = false)
+    private String startLatitude; // 출발지 위도
+
+    @Column(nullable = false)
+    private String startLongitude; // 출발지 경도
+
+    @Column(nullable = false)
     private String endPoint;
 
     @Column(nullable = false)
-    private LocalDate date;  // 날짜만 필요할 경우 LocalDate 사용
+    private String endLatitude; // 도착지 위도
 
     @Column(nullable = false)
-    private LocalTime time;  // 시간만 필요할 경우 LocalTime 사용
+    private String endLongitude; // 도착지 경도
+
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @Column(nullable = false)
+    private LocalTime time;
 
     @Column(nullable = false)
     private Integer personnel;
@@ -33,7 +45,7 @@ public class Post {
     @Column(nullable = false)
     private String writer;
 
-    @Column(nullable = false, updatable = false)  // 생성 시에만 설정, 업데이트 불가
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
@@ -41,7 +53,7 @@ public class Post {
 
     @PrePersist
     private void prePersist() {
-        this.createdAt = LocalDateTime.now();  // `this` 키워드를 사용하여 클래스 필드를 참조
-        this.updatedAt = LocalDateTime.now();  // 동시에 updatedAt도 초기화
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 }

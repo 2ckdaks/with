@@ -10,9 +10,12 @@ import java.time.LocalTime;
 @Setter
 public class PostDto {
     private String startPoint;
+    private String startLatitude;
+    private String startLongitude;
     private String endPoint;
+    private String endLatitude;
+    private String endLongitude;
     private LocalDate date;
     private LocalTime time;
     private Integer personnel;
-    private String writer;
 }

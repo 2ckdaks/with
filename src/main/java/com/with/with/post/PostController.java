@@ -1,6 +1,7 @@
 package com.with.with.post;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -16,13 +17,15 @@ import java.util.Optional;
 @Controller
 @RequiredArgsConstructor
 public class PostController {
+    @Value("${kakao.api.key}")
+    private String kakaoApiKey;
 
     private final PostService postService;
     private final PostRepository postRepository;
 
     @GetMapping("/write")
-    public String write(){
-
+    public String write(Model model){
+        model.addAttribute("apiKey", kakaoApiKey);
         return "write.html";
     }
 
