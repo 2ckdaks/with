@@ -23,9 +23,7 @@ public class MemberService {
     public void addMember(String username, String password, String displayName, String userType, String profileImageUrl){
         Member member = new Member();
 
-//        String hashPassword = new BCryptPasswordEncoder().encode(password);
         String hashPassword = passwordEncoder.encode(password); //다른 class를 디펜던시 인젝션으로 사용
-        System.out.println(hashPassword);
 
         member.setUsername(username);
         member.setPassword(hashPassword); //해싱해줘야함

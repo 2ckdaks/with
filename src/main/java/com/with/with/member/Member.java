@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+
 @Entity
 @ToString
 @Getter
@@ -18,11 +19,15 @@ public class Member {
     @Column(unique = true)
     private String username;
 
+    @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
     private String displayName;
 
+    @Column(nullable = false)
     private String userType;
 
+    @Column(nullable = false)
     private String profileImageUrl;
 }
