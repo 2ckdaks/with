@@ -19,19 +19,19 @@ public class Post {
     private String startPoint;
 
     @Column(nullable = false)
-    private String startLatitude; // 출발지 위도
+    private double startLatitude; // 출발지 위도 변경
 
     @Column(nullable = false)
-    private String startLongitude; // 출발지 경도
+    private double startLongitude; // 출발지 경도 변경
 
     @Column(nullable = false)
     private String endPoint;
 
     @Column(nullable = false)
-    private String endLatitude; // 도착지 위도
+    private double endLatitude; // 도착지 위도 변경
 
     @Column(nullable = false)
-    private String endLongitude; // 도착지 경도
+    private double endLongitude; // 도착지 경도 변경
 
     @Column(nullable = false)
     private LocalDate date;
@@ -57,3 +57,4 @@ public class Post {
         this.updatedAt = LocalDateTime.now();
     }
 }
+
