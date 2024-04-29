@@ -52,6 +52,9 @@
             <button class="btn btn-danger">수정</button>
         </a>
         <button th:if="${post.writer == #authentication.principal.username}" class="btn btn-danger" th:onclick="'deletePost(' + ${post.id} + ');'">삭제</button>
+        <a th:href="@{'/chat/' + ${post.id}}">
+            <button class="btn btn-primary">채팅 참여</button>
+        </a>
     </div>
 </div>
 

@@ -9,13 +9,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -28,22 +29,19 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http.csrf((csrf)-> csrf.disable()); // 개발 편의를 위해 csrf 비활성화
-        http.csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository())
-                .ignoringRequestMatchers("/login")
-        );
-        http.authorizeHttpRequests((authorize) ->
-                authorize.requestMatchers("/**").permitAll()
-        );
-        http.formLogin((formLogin) ->
-                formLogin.loginPage("/login").defaultSuccessUrl("/my-page")
-        );
-        http.logout(logout -> logout.logoutUrl("/logout"));
-        http.rememberMe(rememberMe -> rememberMe
-                .key("uniqueAndSecret") // 설정한 키를 사용하여 토큰을 생성
-                .tokenValiditySeconds(86400) // 토큰 유효 기간 설정 (여기서는 24시간)
-        );
+        http
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository())
+                        .ignoringRequestMatchers(new AntPathRequestMatcher("/websocket-chat/**"))) // CSRF 검사에서 "/websocket-chat/**" 경로 제외
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/websocket-chat/**").permitAll() // WebSocket 경로 권한 허용
+                        .anyRequest().authenticated())
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/login").defaultSuccessUrl("/my-page"))
+                .logout(logout -> logout.logoutUrl("/logout"))
+                .rememberMe(rememberMe -> rememberMe
+                        .key("uniqueAndSecret").tokenValiditySeconds(86400)); // 24시간 동안 유효
+
         return http.build();
     }
-
 }
