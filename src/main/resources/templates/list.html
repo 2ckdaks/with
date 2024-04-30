@@ -24,13 +24,13 @@
     </div>
 
     <ul class="list-group">
-        <li th:each="post : ${posts}" class="list-group-item">
+        <li th:each="post : ${posts}" class="list-group-item" th:data-id="${post.id}">
             <p> 글번호 : <span th:text="${post.id}"></span> </p>
             <p> 출발지 : <span th:text="${post.startPoint}"></span> </p>
             <p> 도착지 : <span th:text="${post.endPoint}"></span> </p>
             <p> 날짜 : <span th:text="${post.date}"></span> </p>
             <p> 시간 : <span th:text="${post.time}"></span> </p>
-            <p> 모집인원 : <span th:text="${post.personnel}"></span> 명 </p>
+            <p> 모집인원 : <span th:text="${post.personnel}"></span> / <span id="participants-${post.id}">0 명 참여 중</span></p>
             <p> 작성자 : <span th:text="${post.writer}"></span> </p>
             <a th:href="@{'/detail/' + ${post.id}}">
                 <button class="btn btn-danger" th:id="${post.id}" th:attr="data-id=${post.id}">참여</button>
@@ -85,6 +85,37 @@
             console.log("Geolocation is not supported by this browser.");
         }
     };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+<script>
+    var stompClient = null;
+
+    function connect() {
+        var socket = new SockJS('/websocket-chat');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+            // 각 게시물(채팅방)에 대한 참여자 수 업데이트 구독
+            $('.list-group-item').each(function() {
+                var postId = $(this).data('id');
+                stompClient.subscribe('/topic/participants/' + postId, function(message) {
+                    updateParticipants(postId, JSON.parse(message.body));
+                });
+            });
+        });
+    }
+
+    function updateParticipants(postId, count) {
+    console.log("Updating participants for post: " + postId + " with count: " + count);
+    var participantElement = $('#participants\\-' + postId); // ID 참조 수정
+    participantElement.text(count + ' 명 참여 중');
+}
+
+
+    $(document).ready(function() {
+        connect();
+    });
 </script>
 </body>
 </html>
