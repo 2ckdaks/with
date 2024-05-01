@@ -67,16 +67,19 @@ public class ChatController {
 
     @MessageMapping("/chat.addUser/{roomId}")
     @SendTo("/topic/{roomId}")
-    public ParticipantInfo addUser(@DestinationVariable String roomId, ChatMessage chatMessage, Authentication authentication) {
+    public ChatMessage addUser(@DestinationVariable String roomId, Authentication authentication) {
         CustomUser user = (CustomUser) authentication.getPrincipal();
         String username = user.getUsername();
+        ChatMessage chatMessage = new ChatMessage();
         chatMessage.setContent(username + "님이 채팅에 참여했습니다.");
         chatMessage.setType(ChatMessage.MessageType.JOIN);
-        chatMessage.setSender("System");  // 발신자를 'System'으로 설정
+        chatMessage.setSender("System");
         joinRoom(roomId, username);
         System.out.println(username + "님이 채팅에 참여했습니다.");
-        return sendParticipantUpdate(roomId);
+        sendParticipantUpdate(roomId);  // 참가자 정보 업데이트
+        return chatMessage;  // 채팅 메시지 반환
     }
+
 
     @MessageMapping("/app/disconnect")
     public void handleDisconnect(@RequestBody DisconnectRequest disconnectRequest) {

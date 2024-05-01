@@ -1,18 +1,18 @@
 package com.with.with.chat;
 
-public class ChatMessage {
-    private MessageType type; // 메시지 타입 (CHAT, JOIN, LEAVE 등)
-    private String content; // 메시지 내용
-    private String sender; // 메시지 보낸 사람
+import com.fasterxml.jackson.annotation.JsonFormat;
 
-    // 메시지 타입을 정의하는 enum
+public class ChatMessage {
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private MessageType type;
+    private String content;
+    private String sender;
+
     public enum MessageType {
-        CHAT,
-        JOIN,
-        LEAVE
+        CHAT, JOIN, LEAVE
     }
 
-    // getters and setters
+    // Getters and setters
     public MessageType getType() {
         return type;
     }
