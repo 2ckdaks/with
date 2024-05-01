@@ -114,6 +114,12 @@ public class ChatController {
         if (roomId != null && username != null) {
             leaveRoom(roomId, username);
             System.out.println(username + "님이 채팅에서 나갔습니다.");
+            // 채팅 메시지 객체 생성 및 전송
+            ChatMessage leaveMessage = new ChatMessage();
+            leaveMessage.setSender("System");
+            leaveMessage.setContent(username + "님이 채팅에서 나갔습니다.");
+            leaveMessage.setType(ChatMessage.MessageType.LEAVE);
+            template.convertAndSend("/topic/" + roomId, leaveMessage);
         } else {
             System.out.println("Error: Room ID or Username not found in session.");
         }
