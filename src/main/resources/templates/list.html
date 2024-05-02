@@ -30,7 +30,7 @@
             <p> 도착지 : <span th:text="${post.endPoint}"></span> </p>
             <p> 날짜 : <span th:text="${post.date}"></span> </p>
             <p> 시간 : <span th:text="${post.time}"></span> </p>
-            <p> 모집인원 : <span th:text="${post.personnel}"></span> / <span id="participants-${post.id}">0 명 참여 중</span></p>
+            <p> 모집인원 : <span th:text="${post.personnel}"></span> / <span th:id="'participants-' + ${post.id}" th:text="0 + ' 명 참여 중'"></span></p>
             <p> 작성자 : <span th:text="${post.writer}"></span> </p>
             <a th:href="@{'/detail/' + ${post.id}}">
                 <button class="btn btn-danger" th:id="${post.id}" th:attr="data-id=${post.id}">참여</button>
@@ -52,53 +52,68 @@
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
         crossorigin="anonymous"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
 <script>
-    window.onload = function() {
-        const csrfToken = document.querySelector('meta[name="_csrf"]').content; // CSRF 토큰 읽기
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content; // CSRF 헤더 이름 읽기
+    window.addEventListener('load', function() {
+        sendLocation();
+        connect();
+    });
 
+    function sendLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 const latitude = position.coords.latitude;
                 const longitude = position.coords.longitude;
-
-                // 서버로 위치 데이터 전송
-                $.ajax({
-                    url: '/list/location',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ latitude: latitude, longitude: longitude }),
-                    beforeSend: function(xhr) {
-                        xhr.setRequestHeader(csrfHeader, csrfToken); // 헤더에 CSRF 토큰 설정
-                    },
-                    success: function(response) {
-                        console.log("Location sent to the server.");
-                    },
-                    error: function(xhr) {
-                        console.error("Error sending location data:", xhr);
-                    }
-                });
+                sendLocationToServer(latitude, longitude);
             }, function(error) {
-                console.error("위치데이터 권한 허용이 필요합니다.:", error);
+                console.error("위치 데이터 권한 허용이 필요합니다.:", error);
             });
         } else {
             console.log("Geolocation is not supported by this browser.");
         }
-    };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
-<script>
-    var stompClient = null;
+    }
+
+    function sendLocationToServer(latitude, longitude) {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        $.ajax({
+            url: '/list/location',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ latitude: latitude, longitude: longitude }),
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader(csrfHeader, csrfToken);
+            },
+            success: function(response) {
+                console.log("Location sent to the server.");
+            },
+            error: function(xhr) {
+                console.error("Error sending location data:", xhr);
+            }
+        });
+    }
 
     function connect() {
+        var stompClient = null;
         var socket = new SockJS('/websocket-chat');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function(frame) {
             console.log('Connected: ' + frame);
-            // 각 게시물(채팅방)에 대한 참여자 수 업데이트 구독
-            $('.list-group-item').each(function() {
-                var postId = $(this).data('id');
+            document.querySelectorAll('.list-group-item').forEach(function(item) {
+                var postId = item.getAttribute('data-id');
+                console.log('Checking post ID:', postId); // Log the post ID
+
+                // Verify if the corresponding participant element exists
+                var participantElement = document.getElementById('participants-' + postId);
+                if (participantElement) {
+                    console.log('Participant element found for post ID:', postId);
+                } else {
+                    console.log('No participant element found for post ID:', postId);
+                }
+
+                // Subscribe to the WebSocket topic for this post ID
                 stompClient.subscribe('/topic/participants/' + postId, function(message) {
                     updateParticipants(postId, JSON.parse(message.body));
                 });
@@ -106,16 +121,15 @@
         });
     }
 
-    function updateParticipants(postId, count) {
-    console.log("Updating participants for post: " + postId + " with count: " + count);
-    var participantElement = $('#participants\\-' + postId); // ID 참조 수정
-    participantElement.text(count + ' 명 참여 중');
-}
-
-
-    $(document).ready(function() {
-        connect();
-    });
+    function updateParticipants(postId, data) {
+        var participantElement = document.getElementById('participants-' + postId);
+        if (participantElement && data.count !== undefined) {
+            participantElement.textContent = data.count + ' 명 참여 중';
+            console.log("Post ID " + postId + ": " + data.count + " 명 참여 중");
+        } else {
+            console.error('Error: Element not found or no count received for post ' + postId);
+        }
+    }
 </script>
 </body>
 </html>

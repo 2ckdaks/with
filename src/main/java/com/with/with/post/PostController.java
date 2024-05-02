@@ -50,18 +50,25 @@ public class PostController {
     @GetMapping("/list/page/{number}")
     public String getListPage(Model model, @PathVariable Integer number, HttpSession session, Pageable pageable) {
         Map<String, Double> location = (Map<String, Double>) session.getAttribute("userLocation");
+        Page<Post> posts;
+
         if (location != null) {
             double lat = location.get("latitude");
             double lon = location.get("longitude");
-            Page<Post> posts = postRepository.findByLocationNear(lat, lon, pageable);
-            model.addAttribute("posts", posts);
+            posts = postRepository.findByLocationNear(lat, lon, pageable);
         } else {
             // 위치 정보 없이 기본 페이지네이션 사용
-            Page<Post> posts = postRepository.findPageBy(pageable);
-            model.addAttribute("posts", posts);
+            posts = postRepository.findPageBy(pageable);
         }
+
+        model.addAttribute("posts", posts);
+
+        // 로그 출력: 각 게시물의 ID와 현재 페이지 번호
+        posts.forEach(post -> System.out.println("Post ID: " + post.getId() + " loaded for page " + number));
+
         return "list.html";
     }
+
 
 
     @PostMapping("/add-write")
