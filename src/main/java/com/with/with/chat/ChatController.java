@@ -1,6 +1,9 @@
 package com.with.with.chat;
 
 import com.with.with.member.CustomUser;
+import com.with.with.post.Post;
+import com.with.with.post.PostRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -17,6 +20,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.http.ResponseEntity;
+
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,22 +35,50 @@ public class ChatController {
 
     private final SimpMessagingTemplate template;
     private Map<String, Set<String>> participants = new ConcurrentHashMap<>();
+    private  final PostRepository postRepository;
 
-    public ChatController(SimpMessagingTemplate template) {
+    public ChatController(SimpMessagingTemplate template, PostRepository postRepository) {
         this.template = template;
+        this.postRepository = postRepository;
     }
 
     @GetMapping("/chat/{postId}")
-    public String getChatPage(@PathVariable String postId, Model model, HttpSession session) {
+    public String getChatPage(@PathVariable String postId, Model model, HttpSession session, HttpServletResponse response) throws IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         model.addAttribute("roomId", postId);
         if (auth != null && auth.isAuthenticated()) {
             CustomUser user = (CustomUser) auth.getPrincipal();
             model.addAttribute("username", user.getUsername());
-            session.setAttribute("roomId", postId); // HttpSession에 roomId 저장
+            session.setAttribute("roomId", postId);
+
+            // DB에서 게시물 정보 조회
+            Post post = postRepository.findById(Long.parseLong(postId)).orElse(null);
+            if (post == null) {
+                response.sendRedirect("/404"); // 게시물이 존재하지 않는 경우
+                return null;
+            }
+
+            int maxParticipants = post.getPersonnel();
+            ParticipantInfo participantInfo = getCurrentParticipants(postId);
+
+            if (participantInfo.getCount() >= maxParticipants) {
+                response.setContentType("text/html; charset=UTF-8");
+                PrintWriter out = response.getWriter();
+                out.println("<script>alert('인원이 가득 찼습니다.'); history.go(-1);</script>");
+                out.flush();
+                return null;
+            }
+
             joinRoom(postId, user.getUsername());
+            return "chat.html";
         }
-        return "chat.html";
+        return "redirect:/login";
+    }
+
+
+    private ParticipantInfo getCurrentParticipants(String roomId) {
+        Set<String> currentParticipants = participants.getOrDefault(roomId, new HashSet<>());
+        return new ParticipantInfo(currentParticipants.size(), currentParticipants);
     }
 
 
@@ -110,12 +144,16 @@ public class ChatController {
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(event.getMessage());
-        String username = headerAccessor.getUser().getName();
+        String username = headerAccessor.getUser() != null ? headerAccessor.getUser().getName() : null;
         String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
 
-        // 참여자 목록에서 해당 사용자가 있는지 확인
+        if (roomId == null || username == null) {
+            System.out.println("Disconnection event ignored: Missing roomId or username");
+            return;  // roomId 또는 username이 null인 경우 메소드 실행 중단
+        }
+
         Set<String> roomParticipants = participants.getOrDefault(roomId, new HashSet<>());
-        if (roomId != null && username != null && roomParticipants.contains(username)) {
+        if (roomParticipants.contains(username)) {
             leaveRoom(roomId, username);
             System.out.println(username + "님이 채팅에서 나갔습니다.");
             ChatMessage leaveMessage = new ChatMessage();
@@ -127,6 +165,7 @@ public class ChatController {
             System.out.println("No action needed: User was not in chat or invalid session.");
         }
     }
+
 
     @GetMapping("/chat/participants")
     public ResponseEntity<Map<String, Integer>> getAllParticipants() {
