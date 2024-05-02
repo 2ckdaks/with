@@ -1,5 +1,6 @@
 package com.with.with.post;
 
+import com.with.with.chat.ChatController;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ public class PostController {
 
     private final PostService postService;
     private final PostRepository postRepository;
+    private final ChatController chatController;
 
     @GetMapping("/write")
     public String write(Model model){

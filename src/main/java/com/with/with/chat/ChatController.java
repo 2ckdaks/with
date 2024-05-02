@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.http.ResponseEntity;
+import java.util.HashMap;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashSet;
@@ -111,17 +113,27 @@ public class ChatController {
         String username = headerAccessor.getUser().getName();
         String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
 
-        if (roomId != null && username != null) {
+        // 참여자 목록에서 해당 사용자가 있는지 확인
+        Set<String> roomParticipants = participants.getOrDefault(roomId, new HashSet<>());
+        if (roomId != null && username != null && roomParticipants.contains(username)) {
             leaveRoom(roomId, username);
             System.out.println(username + "님이 채팅에서 나갔습니다.");
-            // 채팅 메시지 객체 생성 및 전송
             ChatMessage leaveMessage = new ChatMessage();
             leaveMessage.setSender("System");
             leaveMessage.setContent(username + "님이 채팅에서 나갔습니다.");
             leaveMessage.setType(ChatMessage.MessageType.LEAVE);
             template.convertAndSend("/topic/" + roomId, leaveMessage);
         } else {
-            System.out.println("Error: Room ID or Username not found in session.");
+            System.out.println("No action needed: User was not in chat or invalid session.");
         }
+    }
+
+    @GetMapping("/chat/participants")
+    public ResponseEntity<Map<String, Integer>> getAllParticipants() {
+        Map<String, Integer> participantCounts = new HashMap<>();
+        participants.forEach((roomId, users) -> {
+            participantCounts.put(roomId, users.size());
+        });
+        return ResponseEntity.ok(participantCounts);
     }
 }

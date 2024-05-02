@@ -30,7 +30,7 @@
             <p> 도착지 : <span th:text="${post.endPoint}"></span> </p>
             <p> 날짜 : <span th:text="${post.date}"></span> </p>
             <p> 시간 : <span th:text="${post.time}"></span> </p>
-            <p> 모집인원 : <span th:text="${post.personnel}"></span> / <span th:id="'participants-' + ${post.id}" th:text="0 + ' 명 참여 중'"></span></p>
+            <p> 인원 : <span th:id="'participants-' + ${post.id}" th:text="0"></span> / <span th:text="${post.personnel}"></span></p>
             <p> 작성자 : <span th:text="${post.writer}"></span> </p>
             <a th:href="@{'/detail/' + ${post.id}}">
                 <button class="btn btn-danger" th:id="${post.id}" th:attr="data-id=${post.id}">참여</button>
@@ -58,6 +58,7 @@
     window.addEventListener('load', function() {
         sendLocation();
         connect();
+        loadInitialParticipants(); // 서버로부터 초기 참여자 수를 로드
     });
 
     function sendLocation() {
@@ -103,9 +104,8 @@
             console.log('Connected: ' + frame);
             document.querySelectorAll('.list-group-item').forEach(function(item) {
                 var postId = item.getAttribute('data-id');
-                console.log('Checking post ID:', postId); // Log the post ID
+                console.log('Checking post ID:', postId);
 
-                // Verify if the corresponding participant element exists
                 var participantElement = document.getElementById('participants-' + postId);
                 if (participantElement) {
                     console.log('Participant element found for post ID:', postId);
@@ -113,7 +113,6 @@
                     console.log('No participant element found for post ID:', postId);
                 }
 
-                // Subscribe to the WebSocket topic for this post ID
                 stompClient.subscribe('/topic/participants/' + postId, function(message) {
                     updateParticipants(postId, JSON.parse(message.body));
                 });
@@ -124,12 +123,33 @@
     function updateParticipants(postId, data) {
         var participantElement = document.getElementById('participants-' + postId);
         if (participantElement && data.count !== undefined) {
-            participantElement.textContent = data.count + ' 명 참여 중';
+            participantElement.textContent = data.count;
             console.log("Post ID " + postId + ": " + data.count + " 명 참여 중");
         } else {
             console.error('Error: Element not found or no count received for post ' + postId);
         }
     }
+
+    // 서버로부터 모든 채팅방의 참여자 수를 가져와 초기화하는 함수
+    function loadInitialParticipants() {
+        $.ajax({
+            url: '/chat/participants',
+            type: 'GET',
+            success: function(response) {
+                Object.keys(response).forEach(function(roomId) {
+                    var participantElement = document.getElementById('participants-' + roomId);
+                    if (participantElement) {
+                        participantElement.textContent = response[roomId];
+                        console.log("Updated participants for room " + roomId + " to " + response[roomId]);
+                    }
+                });
+            },
+            error: function(xhr) {
+                console.error("Error loading initial participants data:", xhr);
+            }
+        });
+    }
 </script>
+
 </body>
 </html>
