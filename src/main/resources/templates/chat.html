@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Chat Room</title>
-    <link rel="stylesheet" href="/css/main.css">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+    <link rel="stylesheet" href="/css/main.css">
     <meta name="_csrf" th:content="${_csrf.token}">
 </head>
 <body th:attr="data-username=${username}">
 <div class="container">
     <div th:replace="~{ nav.html::navbar }"></div>
     <h4 class="ml-2 my-3 text-center">채팅 페이지</h4>
-    <div id="participantsList">참여자: 0명</div>
-    <div id="participantsNames">참여자: </div>
+    <div id="participantsList" class="alert alert-info">참여자: 0명</div>
+    <ul id="participantsNames" class="list-group alert alert-light"></ul>
     <div id="messageArea" class="alert alert-secondary"></div>
     <input type="text" id="messageInput" class="form-control" placeholder="메시지 입력...">
-    <br>
-    <button onclick="sendMessage()" class="btn btn-primary">전송</button>
+    <button onclick="sendMessage()" class="btn btn-primary btn-block mt-2">전송</button>
 </div>
 
 <script>
     var roomId = [[${roomId}]];
     var stompClient = null;
     var username = document.body.getAttribute('data-username');
-    console.log("유저네임: " + username);
 
     window.onload = function() {
         connect();
@@ -63,45 +61,60 @@
     }
 
     function showMessage(message) {
-        console.log("Received message:", message);
         var messageArea = document.getElementById('messageArea');
         var messageElement = document.createElement('div');
         messageElement.classList.add('chat-message');
-
-        // 데이터에 'type' 필드가 존재하는지 확인
-        if (message.type) {
-            if (message.type === 'CHAT') {
-                messageElement.textContent = message.sender + ": " + message.content;
-            } else if (message.type === 'JOIN' || message.type === 'LEAVE') {
-                messageElement.textContent = message.content;
-                messageElement.style.color = 'gray';
-            } else {
-                messageElement.textContent = "Unknown message type: " + message.type;
-            }
-        } else if (message.count && message.names) {
-            // 참가자 정보 업데이트 메시지 처리
-            updateParticipants(message);
-            return; // 이 경우 추가 메시지 처리를 중단
-        } else {
-            messageElement.textContent = "Received unsupported message format";
-            console.error('Error: Received unsupported message format', message);
+        if (message.type === 'CHAT') {
+            messageElement.textContent = message.sender + ": " + message.content;
+        } else if (message.type === 'JOIN' || message.type === 'LEAVE') {
+            messageElement.textContent = message.content;
+            messageElement.style.color = 'gray';
         }
-
         messageArea.appendChild(messageElement);
         messageArea.scrollTop = messageArea.scrollHeight;
     }
 
     function updateParticipants(data) {
         document.getElementById('participantsList').textContent = `참여자: ${data.count}명`;
-        document.getElementById('participantsNames').textContent = `참여자: ${data.names.join(', ')}`;
-        console.log("현재 참여자: " + data.count + "명 - " + data.names.join(', '));
+        var participantsNames = document.getElementById('participantsNames');
+        participantsNames.innerHTML = '';
+        data.names.forEach(function(name) {
+            var participantItem = document.createElement('li');
+            participantItem.classList.add('list-group-item', 'participant-name');
+
+            var infoDiv = document.createElement('div');
+            infoDiv.classList.add('participant-info');
+            infoDiv.textContent = name;
+
+            var buttonDiv = document.createElement('div');
+            buttonDiv.classList.add('participant-buttons');
+
+            var reviewButton = document.createElement('button');
+            reviewButton.textContent = '방명록';
+            reviewButton.className = 'btn btn-sm btn-outline-secondary';
+            reviewButton.onclick = function() {
+                window.open('/review/' + name, '_blank');
+            };
+
+            var kickButton = document.createElement('button');
+            kickButton.textContent = '강퇴';
+            kickButton.className = 'btn btn-sm btn-danger';
+            kickButton.onclick = function() {
+                alert(name + '를 강퇴합니다.');
+            };
+
+            buttonDiv.appendChild(reviewButton);
+            buttonDiv.appendChild(kickButton);
+
+            participantItem.appendChild(infoDiv);
+            participantItem.appendChild(buttonDiv);
+            participantsNames.appendChild(participantItem);
+        });
     }
 
     window.addEventListener("beforeunload", function (event) {
         navigator.sendBeacon("/app/disconnect", JSON.stringify({roomId: roomId, username: username}));
     });
 </script>
-
-
 </body>
 </html>

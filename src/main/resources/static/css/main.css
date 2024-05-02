@@ -1,15 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap');
+
 .nav {
     display: flex;
     padding: 10px;
     align-items: center;
-    font-family: 'Montserrat';
-    width: 100%; /* 네비게이션 바의 폭을 전체 폭으로 설정 */
+    font-family: 'Montserrat', sans-serif;
+    width: 100%;
 }
 
 .container {
-    width: 80%; /* 내용 컨테이너 폭을 80%로 설정하여 가운데 정렬될 수 있도록 함 */
-    margin: auto; /* 상하 마진은 자동으로 설정하여 가운데 정렬 */
+    width: 80%;
+    margin: auto;
 }
 
 .nav a {
@@ -25,9 +26,94 @@
 
 body {
     margin: 0;
+    font-family: 'Montserrat', sans-serif;
 }
 
 #messageArea {
     min-height: 200px;
+    border: 1px solid #ddd;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap');
+
+.nav {
+    display: flex;
+    padding: 10px;
+    align-items: center;
+    font-family: 'Montserrat', sans-serif;
+    width: 100%;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+}
+
+.nav a {
+    margin-right: 10px;
+    text-decoration: none;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+}
+
+.nav .logo {
+    font-weight: 800;
+}
+
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+#messageArea {
+    min-height: 200px;
+    border: 1px solid #ddd;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.list-group-item {
+    display: flex; /* 항목들이 flex 컨테이너로 작동하도록 설정 */
+    justify-content: space-between; /* 이름과 버튼을 양 끝으로 정렬 */
+    align-items: center;
+    width: 100%; /* li 태그가 전체 너비를 차지하도록 설정 */
+    padding 0;
+}
+
+#participantsNames {
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+.participant-name div {
+    display: flex;
+    gap: 10px;
+}
+
+.participant-name button {
+    white-space: nowrap;
+}
+
+.chat-message {
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+#messageInput {
+    margin-top: 20px;
+}
+
+
+.chat-message {
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+#messageInput {
+    margin-top: 20px;
 }
 
