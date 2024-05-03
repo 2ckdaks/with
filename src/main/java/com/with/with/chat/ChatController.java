@@ -58,6 +58,8 @@ public class ChatController {
                 return null;
             }
 
+            model.addAttribute("writer", post.getWriter());
+
             int maxParticipants = post.getPersonnel();
             ParticipantInfo participantInfo = getCurrentParticipants(postId);
 
@@ -174,5 +176,27 @@ public class ChatController {
             participantCounts.put(roomId, users.size());
         });
         return ResponseEntity.ok(participantCounts);
+    }
+
+    @MessageMapping("/chat.kickUser/{roomId}")
+    public void kickUser(@DestinationVariable String roomId, @RequestBody KickRequest kickRequest, SimpMessageHeaderAccessor headerAccessor) {
+        String requestingUser = headerAccessor.getUser().getName();
+        if (participants.get(roomId).contains(requestingUser) && requestingUser.equals(kickRequest.getAdmin())) {
+            leaveRoom(roomId, kickRequest.getUsernameToKick());
+
+            // 강퇴 알림 메시지 전송
+            ChatMessage kickMessage = new ChatMessage();
+            kickMessage.setSender("System");
+            kickMessage.setContent(kickRequest.getUsernameToKick() + "님이 방에서 강퇴되었습니다.");
+            kickMessage.setType(ChatMessage.MessageType.LEAVE);
+            template.convertAndSend("/topic/" + roomId, kickMessage);
+
+            // 강퇴된 사용자를 기본 페이지로 리다이렉트하라는 메시지 전송
+            template.convertAndSendToUser(kickRequest.getUsernameToKick(), "/queue/kick", "redirect:/");
+
+            System.out.println(kickRequest.getUsernameToKick() + " has been kicked out from " + roomId + " by " + requestingUser);
+        } else {
+            System.out.println("Kick request denied for " + requestingUser + " in " + roomId);
+        }
     }
 }

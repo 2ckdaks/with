@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/css/main.css">
     <meta name="_csrf" th:content="${_csrf.token}">
 </head>
-<body th:attr="data-username=${username}">
+<body th:attr="data-username=${username}, data-writer=${writer}">
 <div class="container">
     <div th:replace="~{ nav.html::navbar }"></div>
     <h4 class="ml-2 my-3 text-center">채팅 페이지</h4>
@@ -40,6 +40,13 @@
             });
             stompClient.subscribe('/topic/participants/' + roomId, function (message) {
                 updateParticipants(JSON.parse(message.body));
+            });
+            stompClient.subscribe('/user/queue/kick', function (message) {
+                console.log("Received kick message: ", message);
+                console.log("Message body: ", message.body);
+                if (message.body === "redirect:/") {
+                    window.location.href = "/";
+                }
             });
             sendJoinMessage();
         }, function(error) {
@@ -76,8 +83,8 @@
 
     function updateParticipants(data) {
         document.getElementById('participantsList').textContent = `참여자: ${data.count}명`;
-        var participantsNames = document.getElementById('participantsNames');
-        participantsNames.innerHTML = '';
+            var participantsNames = document.getElementById('participantsNames');
+            participantsNames.innerHTML = '';
         data.names.forEach(function(name) {
             var participantItem = document.createElement('li');
             participantItem.classList.add('list-group-item', 'participant-name');
@@ -96,15 +103,30 @@
                 window.open('/review/' + name, '_blank');
             };
 
-            var kickButton = document.createElement('button');
-            kickButton.textContent = '강퇴';
-            kickButton.className = 'btn btn-sm btn-danger';
-            kickButton.onclick = function() {
-                alert(name + '를 강퇴합니다.');
-            };
-
             buttonDiv.appendChild(reviewButton);
-            buttonDiv.appendChild(kickButton);
+
+
+            // 강퇴 버튼은 writer가 로그인한 사용자와 일치할 경우에만 추가
+            var writer = document.body.getAttribute('data-writer');
+            if (username === writer) {
+                var kickButton = document.createElement('button');
+                kickButton.textContent = '강퇴';
+                kickButton.className = 'btn btn-sm btn-danger';
+                kickButton.onclick = function() {
+                    // confirm 대화 상자를 사용하여 강퇴 전에 확인
+                    if (confirm(name + '님을 강퇴하시겠습니까?')) {
+                        var kickRequest = {
+                            usernameToKick: name,
+                            admin: username  // 현재 로그인한 사용자
+                        };
+                        stompClient.send("/app/chat.kickUser/" + roomId, {}, JSON.stringify(kickRequest));
+                    } else {
+                        console.log('강퇴가 취소되었습니다.');
+                    }
+                };
+                buttonDiv.appendChild(kickButton);
+            }
+
 
             participantItem.appendChild(infoDiv);
             participantItem.appendChild(buttonDiv);
