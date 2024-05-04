@@ -191,12 +191,14 @@ public class ChatController {
             kickMessage.setType(ChatMessage.MessageType.LEAVE);
             template.convertAndSend("/topic/" + roomId, kickMessage);
 
-            // 강퇴된 사용자를 기본 페이지로 리다이렉트하라는 메시지 전송
-            template.convertAndSendToUser(kickRequest.getUsernameToKick(), "/queue/kick", "redirect:/");
+            // 강퇴된 사용자를 게시물 상세 페이지로 리다이렉트하라는 메시지 전송
+            String redirectUrl = "/detail/" + roomId;  // roomId를 게시물 ID로 사용
+            template.convertAndSendToUser(kickRequest.getUsernameToKick(), "/queue/kick", redirectUrl);
 
             System.out.println(kickRequest.getUsernameToKick() + " has been kicked out from " + roomId + " by " + requestingUser);
         } else {
             System.out.println("Kick request denied for " + requestingUser + " in " + roomId);
         }
     }
+
 }

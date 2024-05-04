@@ -41,12 +41,11 @@
             stompClient.subscribe('/topic/participants/' + roomId, function (message) {
                 updateParticipants(JSON.parse(message.body));
             });
-            stompClient.subscribe('/user/queue/kick', function (message) {
+            stompClient.subscribe('/user/' + username + '/queue/kick', function (message) {
                 console.log("Received kick message: ", message);
-                console.log("Message body: ", message.body);
-                if (message.body === "redirect:/") {
-                    window.location.href = "/";
-                }
+                var redirectUrl = message.body;
+                console.log("Redirecting to: ", redirectUrl);
+                window.location.href = redirectUrl;
             });
             sendJoinMessage();
         }, function(error) {
