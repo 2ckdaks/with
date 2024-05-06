@@ -17,6 +17,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByLocationNear(@Param("lat") double latitude, @Param("lon") double longitude, Pageable pageable);
 
     List<Post> findAllByStartPointContains(String startPoint);
-    @Query(value = "select * from post where match(start_point) against(?1)", nativeQuery = true)
-    List<Post> rawQuery1(String text);
+    @Query(value = "SELECT * FROM post WHERE MATCH(start_point) AGAINST(?1) OR MATCH(end_point) AGAINST(?1)", nativeQuery = true)
+    List<Post> searchByStartOrEndPoint(String text);
 }

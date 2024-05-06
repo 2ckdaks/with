@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -116,10 +117,18 @@ public class PostController {
     }
 
     @PostMapping("/search")
-    String postSearch(@RequestParam String searchText, Model model){
-        var result = postRepository.rawQuery1(searchText);
+    String postSearch(@RequestParam String searchText, @RequestParam String searchType, Model model){
+        List<Post> result;
+        if ("startPoint".equals(searchType)) {
+            result = postRepository.searchByStartOrEndPoint(searchText);  // startPoint 검색
+        } else if ("endPoint".equals(searchType)) {
+            result = postRepository.searchByStartOrEndPoint(searchText);  // endPoint 검색
+        } else {
+            result = new ArrayList<>();  // 검색 유형이 명시되지 않은 경우 빈 결과 반환
+        }
         System.out.println("결과" + result);
         model.addAttribute("posts", result);
         return "search.html";
     }
+
 }

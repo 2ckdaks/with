@@ -17,10 +17,14 @@
     <div th:replace="~{ nav.html::navbar }"></div>
     <h4 class="ml-2 my-3 text-center">검색 결과</h4>
 
-    <form action="/search" method="POST" class="container input-group mb-2">
+    <form action="/search" method="POST" class="input-group mb-3">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <input class="form-control" id="search-input" name="searchText">
-        <button class="input-group-append btn btn-danger" id="search">검색</button>
+        <select class="form-select col-3" name="searchType">
+            <option value="startPoint">출발지</option>
+            <option value="endPoint">도착지</option>
+        </select>
+        <input class="form-control col-9" id="search-input" name="searchText" placeholder="검색어를 입력하세요">
+        <button class="btn btn-danger" type="submit" id="search">검색</button>
     </form>
 
     <ul class="list-group">
