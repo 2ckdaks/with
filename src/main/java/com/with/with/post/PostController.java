@@ -114,4 +114,12 @@ public class PostController {
     public ResponseEntity<String> deletePost(@RequestParam Long id, Authentication authentication) {
         return postService.deletePost(id, authentication);
     }
+
+    @PostMapping("/search")
+    String postSearch(@RequestParam String searchText){
+        var result = postRepository.rawQuery1(searchText);
+        System.out.println("결과" + result);
+
+        return "redirect:/list/page/1";
+    }
 }

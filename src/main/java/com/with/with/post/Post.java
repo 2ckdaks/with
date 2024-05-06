@@ -3,12 +3,16 @@ package com.with.with.post;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
+@ToString
+//검색성능 향상을 위해 index 생성
+@Table(indexes = @Index(name = "startPointIndex", columnList = "startPoint"))
 @Getter
 @Setter
 public class Post {
