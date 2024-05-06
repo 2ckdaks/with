@@ -55,6 +55,9 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private Integer currentParticipants = 0;
+
     @PrePersist
     private void prePersist() {
         this.createdAt = LocalDateTime.now();

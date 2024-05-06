@@ -52,27 +52,26 @@ public class PostController {
 
     @GetMapping("/list/page/{number}")
     public String getListPage(Model model, @PathVariable Integer number, HttpSession session, Pageable pageable) {
+        // number에서 1을 빼서 0부터 시작하는 페이지 인덱스로 조정합니다.
+        // 모든 페이지 요청에 대해 일관적으로 한 페이지당 5개의 게시물을 보여주도록 설정합니다.
+        pageable = PageRequest.of(number - 1, 5);
+
         Map<String, Double> location = (Map<String, Double>) session.getAttribute("userLocation");
         Page<Post> posts;
 
         if (location != null) {
+            // 위치 정보가 있는 경우, 위치 기반 페이지네이션 사용
             double lat = location.get("latitude");
             double lon = location.get("longitude");
-            posts = postRepository.findByLocationNear(lat, lon, pageable);
+            posts = postService.findPostsByLocation(pageable, lat, lon);
         } else {
-            // 위치 정보 없이 기본 페이지네이션 사용
+            // 위치 정보가 없는 경우, 일반 페이지네이션 사용
             posts = postRepository.findPageBy(pageable);
         }
 
         model.addAttribute("posts", posts);
-
-        // 로그 출력: 각 게시물의 ID와 현재 페이지 번호
-        posts.forEach(post -> System.out.println("Post ID: " + post.getId() + " loaded for page " + number));
-
         return "list.html";
     }
-
-
 
     @PostMapping("/add-write")
     String addPost(@ModelAttribute PostDto postDto, Authentication authentication){
@@ -117,18 +116,10 @@ public class PostController {
     }
 
     @PostMapping("/search")
-    String postSearch(@RequestParam String searchText, @RequestParam String searchType, Model model){
-        List<Post> result;
-        if ("startPoint".equals(searchType)) {
-            result = postRepository.searchByStartOrEndPoint(searchText);  // startPoint 검색
-        } else if ("endPoint".equals(searchType)) {
-            result = postRepository.searchByStartOrEndPoint(searchText);  // endPoint 검색
-        } else {
-            result = new ArrayList<>();  // 검색 유형이 명시되지 않은 경우 빈 결과 반환
-        }
+    public String postSearch(@RequestParam String searchText, @RequestParam String searchType, Model model){
+        List<Post> result = postService.searchPosts(searchText, searchType);
         System.out.println("결과" + result);
         model.addAttribute("posts", result);
         return "search.html";
     }
-
 }
