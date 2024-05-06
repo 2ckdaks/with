@@ -116,10 +116,10 @@ public class PostController {
     }
 
     @PostMapping("/search")
-    String postSearch(@RequestParam String searchText){
+    String postSearch(@RequestParam String searchText, Model model){
         var result = postRepository.rawQuery1(searchText);
         System.out.println("결과" + result);
-
-        return "redirect:/list/page/1";
+        model.addAttribute("posts", result);
+        return "search.html";
     }
 }
