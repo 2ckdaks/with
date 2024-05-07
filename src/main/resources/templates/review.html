@@ -18,7 +18,7 @@
 
     <ul class="list-group mb-3" id="reviewList">
         <li th:each="reviews : ${reviews}" class="list-group-item">
-            <p> 글번호 : <span th:text="${reviews.id}"></span> </p>
+<!--            <p> 글번호 : <span th:text="${reviews.id}"></span> </p>-->
             <p> 리뷰 : <span th:text="${reviews.review}"></span> </p>
             <p> 작성자 : <span th:text="${reviews.writer}"></span> </p>
         </li>

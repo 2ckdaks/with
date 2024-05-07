@@ -143,3 +143,10 @@ body {
     border-color: #bd2130;
 }
 
+.pagination {
+    display: flex;
+    justify-content: center; /* 가운데 정렬 */
+    margin-top: 20px; /* 위쪽에 20px 마진 추가 */
+}
+
+
