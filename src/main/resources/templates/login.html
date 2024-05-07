@@ -34,7 +34,10 @@
                 <label>자동 로그인</label>
                 <input type="checkbox" name="remember-me">
             </div>
-            <button type="submit" class="btn btn-danger">로그인</button>
+            <div class="d-flex">
+                <button type="submit" class="btn btn-danger me-2">로그인</button>
+                <a href="/sign-up" class="btn btn-secondary">회원가입</a>
+            </div>
         </form>
 
         <div th:if="${param.error}">
