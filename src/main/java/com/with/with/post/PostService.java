@@ -1,8 +1,14 @@
 package com.with.with.post;
 
 import com.with.with.member.CustomUser;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -20,27 +27,63 @@ import java.util.Optional;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final Logger logger = LoggerFactory.getLogger(PostService.class);
 
+    // 모든 게시물 조회
     public List<Post> findAll(){
-        return postRepository.findAll();  // List<Post> 반환
+        try {
+            return postRepository.findAll();  // List<Post> 반환
+        } catch (DataAccessException ex) {
+            logger.error("Error retrieving posts", ex);
+            throw new RuntimeException("Error retrieving posts", ex);
+        }
     }
 
+    // 특정 ID의 게시물 조회
     public Optional<Post> findOne(Long id) {
         return postRepository.findById(id);
     }
 
+    // 페이지네이션: 주어진 페이지 정보에 따라 게시물을 조회하여 반환
     public Page<Post> findPostsByLocation(Pageable pageable, double latitude, double longitude) {
         return postRepository.findByLocationNear(latitude, longitude, pageable);
+    }
+
+    // 위치 정보를 기반으로 페이징된 게시물 조회
+    public Page<Post> getPostsByPageAndLocation(int pageNumber, Map<String, Double> location, HttpSession session) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, 5);
+        Page<Post> posts;
+
+        // 사용자 위치 정보가 있으면 해당 위치를 기반으로 게시물을 조회하고, 그렇지 않으면 전체 게시물을 조회
+        if (location != null) {
+            session.setAttribute("userLocation", location);
+            double lat = location.get("latitude");
+            double lon = location.get("longitude");
+            posts = findPostsByLocation(pageable, lat, lon);
+        } else {
+            location = (Map<String, Double>) session.getAttribute("userLocation");
+            if (location != null) {
+                double lat = location.get("latitude");
+                double lon = location.get("longitude");
+                posts = findPostsByLocation(pageable, lat, lon);
+            } else {
+                posts = postRepository.findPageBy(pageable);
+            }
+        }
+
+        return posts;
     }
 
     public Page<Post> findPageBy(Pageable pageable) {
         return postRepository.findPageBy(pageable);
     }
 
+    // 검색어로 게시물 검색
     public List<Post> searchPosts(String searchText, String searchType) {
         return postRepository.searchByStartOrEndPoint(searchText);
     }
 
+    // 게시물 생성
     @Transactional
     public Post createPost(PostDto postDto, Authentication authentication){
         CustomUser user = (CustomUser) authentication.getPrincipal();
@@ -61,7 +104,8 @@ public class PostService {
         return savedPost;
     }
 
-
+    // 게시물 수정
+    @Transactional
     public Post updatePost(PostDto postDto, Long id, Authentication authentication) {
         Optional<Post> existingPost = postRepository.findById(id);
         if (!existingPost.isPresent()) {
@@ -91,7 +135,7 @@ public class PostService {
         return postRepository.save(post);
     }
 
-
+    // 게시물 삭제
     public ResponseEntity<String> deletePost(Long id, Authentication authentication) {
         Optional<Post> post = postRepository.findById(id);
         if (!post.isPresent()) {

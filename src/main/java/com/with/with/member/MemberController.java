@@ -16,16 +16,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberController {
 
-    private final MemberRepository memberRepository;
-    private final ReviewRepository reviewRepository;
     private final MemberService memberService;
-    private final S3Service s3Service;
 
+    // 회원가입 페이지 반환
     @GetMapping("/sign-up")
     public String signUp(){
         return "signUp.html";
     }
 
+    // 회원가입 처리
     @PostMapping("/sign-up")
     public String addMember(String username, String password, String displayName, String userType, String profileImageUrl){
 
@@ -34,15 +33,14 @@ public class MemberController {
         return "redirect:/login";
     }
 
+    // 프로필 이미지 업로드를 위한 사전 서명된 URL 반환
     @GetMapping("/presigned-url")
     @ResponseBody
     String getURL(@RequestParam String filename){
-        var result = s3Service.createPreSignedUrl("profile/" + filename);
-        System.out.println(result);
-
-        return result;
+        return memberService.getPreSignedUrl(filename);
     }
 
+    // 로그인 페이지 반환
     @GetMapping("/login")
     public String login(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -54,32 +52,32 @@ public class MemberController {
         return "login.html";
     }
 
+    // 마이페이지 반환
     @GetMapping("/my-page")
     public String myPage(Authentication authentication){
-        System.out.println(authentication);
-        System.out.println(authentication.getName());
+//        System.out.println(authentication);
+//        System.out.println(authentication.getName());
         CustomUser result = ( CustomUser ) authentication.getPrincipal();
-        System.out.println(result.displayName);
-        System.out.println(result.userType);
-
+//        System.out.println(result.displayName);
+//        System.out.println(result.userType);
         return "mypage.html";
     }
 
+    // 방명록 조회
     @GetMapping("/review/{id}")
     public String reviewsByUserId(@PathVariable String id, Model model) {
         List<Review> reviews = memberService.findReviewsByTarget(id);
         model.addAttribute("targetId", id);  // 리뷰 대상자의 ID를 모델에 추가
         model.addAttribute("reviews", reviews);  // 조회된 리뷰 목록을 모델에 추가
-        System.out.println(reviews);
+//        System.out.println(reviews);
         return "review.html";  // 리뷰 페이지를 반환
     }
 
 
+    // 방명록 작성
     @PostMapping("/add-review")
     String addReview(@ModelAttribute ReviewDto reviewDto, Authentication authentication){
-
         memberService.createReview(reviewDto, authentication);
-
         return "redirect:/review/" + reviewDto.getTarget();
     }
 }
