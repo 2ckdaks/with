@@ -9,7 +9,7 @@ public class BasicController {
     @GetMapping("/")
     public String mainPage(){
 
-        return "/index.html";
+        return "redirect:/list/page/1";  // 첫 번째 페이지로 리다이렉트
     }
 
 }

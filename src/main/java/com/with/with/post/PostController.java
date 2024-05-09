@@ -40,7 +40,7 @@ public class PostController {
     public String findAll(Model model){
         List<Post> posts = postService.findAll();
         model.addAttribute("posts", posts);  // "posts"라는 이름으로 모델에 추가
-        return "list.html";  // 해당 뷰에 posts 데이터를 전달
+        return "redirect:/list/page/1";  // 첫 번째 페이지로 리다이렉트
     }
 
     // 사용자 위치 정보 받기
