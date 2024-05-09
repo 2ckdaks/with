@@ -38,7 +38,7 @@ public class MemberController {
     // 회원가입 처리
     @PostMapping("/sign-up")
     public String addMember(String username, String password, String displayName, String userType, String profileImageUrl){
-        if (!memberService.checkUsernameAvailability(username)) {
+        if (!memberService.checkUsernameAvailability(username) || password.length() < 8) {
             // 사용자에게 이미 사용 중인 아이디임을 알리고 회원가입 페이지로 리다이렉트
             return "redirect:/sign-up?error=usernameTaken";
         }
