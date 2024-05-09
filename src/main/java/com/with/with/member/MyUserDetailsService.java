@@ -34,6 +34,7 @@ public class MyUserDetailsService implements UserDetailsService {
 //        return new User(user.getUsername(), user.getPassword(), authority);
 
         var customUser = new CustomUser(user.getUsername(), user.getPassword(), authority);
+        customUser.setId(user.getId());  // ID 설정
         customUser.displayName = user.getDisplayName();
         customUser.userType = user.getUserType();
         customUser.profileImageUrl = user.getProfileImageUrl();

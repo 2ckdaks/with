@@ -90,7 +90,7 @@ public class MemberController {
 
     // 마이페이지 수정
     @PostMapping("/my-page/{id}")
-    public String update(@PathVariable String id, Authentication authentication, String displayName) {
+    public String update(@PathVariable Long id, Authentication authentication, String displayName) {
         memberService.updateMember(id, authentication, displayName);
         return "redirect:/my-page";
     }

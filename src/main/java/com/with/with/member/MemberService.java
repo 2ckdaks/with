@@ -57,9 +57,9 @@ public class MemberService {
     }
 
     //회원 수정
-    public void updateMember(String id, Authentication authentication, String displayName) {
+    public void updateMember(Long id, Authentication authentication, String displayName) {
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
-        Member member = memberRepository.findByUsername(id).orElseThrow(() -> new IllegalArgumentException("유효하지 않은 회원 ID입니다."));
+        Member member = memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("유효하지 않은 회원 ID입니다."));
 
         // 현재 로그인한 사용자와 회원 정보의 사용자가 일치하는지 확인
         if (!customUser.getUsername().equals(member.getUsername())) {

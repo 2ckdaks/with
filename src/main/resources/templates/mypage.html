@@ -20,7 +20,7 @@
             <div style="text-align: center;">
                 <img th:src="${#authentication.principal.profileImageUrl}" alt="Profile Image" style="display: block; margin: auto; width: 60%; height: auto;">
             </div>
-            <form th:action="@{'/my-page/' + ${#authentication.principal.username}}" method="POST" >
+            <form th:action="@{'/my-page/' + ${#authentication.principal.id}}" method="POST" >
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <div class="form-group">
                     <label>ID</label>
