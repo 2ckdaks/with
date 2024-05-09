@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .csrfTokenRepository(csrfTokenRepository())
                         .ignoringRequestMatchers(new AntPathRequestMatcher("/websocket-chat/**"))) // CSRF 검사에서 "/websocket-chat/**" 경로 제외
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/sign-up", "/error").permitAll()  // 로그인, 회원가입, 에러 페이지는 누구나 접근 가능
+                        .requestMatchers("/login", "/sign-up", "/error", "/check-username").permitAll()  // 로그인, 회원가입, 에러 페이지는 누구나 접근 가능
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/websocket-chat/**", "/user/queue/**").permitAll()  // WebSocket 경로 권한 허용
                         .anyRequest().authenticated())  // 그 외 모든 요청은 인증 필요

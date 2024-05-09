@@ -22,6 +22,14 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
 
+    // 사용자 아이디 중복 확인
+    public boolean checkUsernameAvailability(String username) {
+        Optional<Member> member = memberRepository.findByUsername(username);
+        boolean isPresent = member.isPresent();
+        System.out.println("Checking database for username: " + username + " - Found: " + isPresent);
+        return !isPresent;
+    }
+
     // 회원 추가
     public void addMember(String username, String password, String displayName, String userType, String profileImageUrl){
         Member member = new Member();

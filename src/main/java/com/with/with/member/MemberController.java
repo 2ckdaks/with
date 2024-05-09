@@ -24,12 +24,25 @@ public class MemberController {
         return "signUp.html";
     }
 
+    // 아이디 중복 확인
+    @GetMapping("/check-username")
+    @ResponseBody
+    public ResponseEntity<String> checkUsername(@RequestParam String username) {
+        boolean isAvailable = memberService.checkUsernameAvailability(username);
+        System.out.println("Username checked: " + username + " - Available: " + isAvailable);
+        return isAvailable ?
+                ResponseEntity.ok("Available") :
+                ResponseEntity.status(HttpStatus.CONFLICT).body("Username already taken");
+    }
+
     // 회원가입 처리
     @PostMapping("/sign-up")
     public String addMember(String username, String password, String displayName, String userType, String profileImageUrl){
-
+        if (!memberService.checkUsernameAvailability(username)) {
+            // 사용자에게 이미 사용 중인 아이디임을 알리고 회원가입 페이지로 리다이렉트
+            return "redirect:/sign-up?error=usernameTaken";
+        }
         memberService.addMember(username, password, displayName, userType, profileImageUrl);
-
         return "redirect:/login";
     }
 
