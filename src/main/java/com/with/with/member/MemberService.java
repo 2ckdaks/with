@@ -3,7 +3,10 @@ package com.with.with.member;
 import com.with.with.post.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,6 +54,32 @@ public class MemberService {
         member.setProfileImageUrl(profileImageUrl);
 
         memberRepository.save(member);
+    }
+
+    //회원 수정
+    public void updateMember(String id, Authentication authentication, String displayName) {
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+        Member member = memberRepository.findByUsername(id).orElseThrow(() -> new IllegalArgumentException("유효하지 않은 회원 ID입니다."));
+
+        // 현재 로그인한 사용자와 회원 정보의 사용자가 일치하는지 확인
+        if (!customUser.getUsername().equals(member.getUsername())) {
+            throw new IllegalArgumentException("자신의 프로필만 수정할 수 있습니다.");
+        }
+
+        // displayName 중복 검사
+        Optional<Member> existingMember = memberRepository.findByDisplayName(displayName);
+        if (existingMember.isPresent() && !existingMember.get().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        }
+
+        // displayName 업데이트
+        member.setDisplayName(displayName);
+        memberRepository.save(member);
+
+        // Security Context 내 Authentication 객체 업데이트
+        customUser.displayName = displayName;
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(customUser, authentication.getCredentials(), authentication.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
 
     // 대상 사용자의 모든 리뷰 조회

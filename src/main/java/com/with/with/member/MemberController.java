@@ -59,18 +59,10 @@ public class MemberController {
     }
 
     // 프로필 이미지 업로드를 위한 사전 서명된 URL 반환
-//    @GetMapping("/presigned-url")
-//    @ResponseBody
-//    String getURL(@RequestParam String filename){
-//        return memberService.getPreSignedUrl(filename);
-//    }
     @GetMapping("/presigned-url")
     @ResponseBody
     String getURL(@RequestParam String filename){
-        var result = s3Service.createPreSignedUrl("profile/" + filename);
-        System.out.println(result);
-
-        return result;
+        return memberService.getPreSignedUrl(filename);
     }
 
     // 로그인 페이지 반환
@@ -94,6 +86,13 @@ public class MemberController {
 //        System.out.println(result.displayName);
 //        System.out.println(result.userType);
         return "mypage.html";
+    }
+
+    // 마이페이지 수정
+    @PostMapping("/my-page/{id}")
+    public String update(@PathVariable String id, Authentication authentication, String displayName) {
+        memberService.updateMember(id, authentication, displayName);
+        return "redirect:/my-page";
     }
 
     // 방명록 조회
