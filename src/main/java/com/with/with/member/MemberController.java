@@ -17,6 +17,7 @@ import java.util.Optional;
 public class MemberController {
 
     private final MemberService memberService;
+    private final S3Service s3Service;
 
     // 회원가입 페이지 반환
     @GetMapping("/sign-up")
@@ -58,10 +59,18 @@ public class MemberController {
     }
 
     // 프로필 이미지 업로드를 위한 사전 서명된 URL 반환
+//    @GetMapping("/presigned-url")
+//    @ResponseBody
+//    String getURL(@RequestParam String filename){
+//        return memberService.getPreSignedUrl(filename);
+//    }
     @GetMapping("/presigned-url")
     @ResponseBody
     String getURL(@RequestParam String filename){
-        return memberService.getPreSignedUrl(filename);
+        var result = s3Service.createPreSignedUrl("profile/" + filename);
+        System.out.println(result);
+
+        return result;
     }
 
     // 로그인 페이지 반환
