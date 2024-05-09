@@ -30,6 +30,14 @@ public class MemberService {
         return !isPresent;
     }
 
+    // 사용자 닉네임 중복 확인
+    public boolean checkDisplaynameAvailability(String displayName) {
+        Optional<Member> member = memberRepository.findByDisplayName(displayName);
+        boolean isPresent = member.isPresent();
+        System.out.println("Checking database for displayName: " + displayName + " - Found: " + isPresent);
+        return !isPresent;
+    }
+
     // 회원 추가
     public void addMember(String username, String password, String displayName, String userType, String profileImageUrl){
         Member member = new Member();

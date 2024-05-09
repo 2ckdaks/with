@@ -35,6 +35,17 @@ public class MemberController {
                 ResponseEntity.status(HttpStatus.CONFLICT).body("Username already taken");
     }
 
+    // 닉네임 중복 확인
+    @GetMapping("/check-displayname")
+    @ResponseBody
+    public ResponseEntity<String> checkDisplayname(@RequestParam String displayName) {
+        boolean isAvailable = memberService.checkDisplaynameAvailability(displayName);
+        System.out.println("Display name checked: " + displayName + " - Available: " + isAvailable);
+        return isAvailable ?
+                ResponseEntity.ok("Available") :
+                ResponseEntity.status(HttpStatus.CONFLICT).body("Display name already taken");
+    }
+
     // 회원가입 처리
     @PostMapping("/sign-up")
     public String addMember(String username, String password, String displayName, String userType, String profileImageUrl){
