@@ -10,6 +10,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <style>
+        #loadingMessage {
+            display: none;
+            text-align: center;
+            font-size: 1.5rem;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
 
@@ -27,19 +35,10 @@
         <button class="btn btn-danger" type="submit" id="search">검색</button>
     </form>
 
-    <ul class="list-group">
-        <li th:each="post : ${posts}" class="list-group-item" th:data-id="${post.id}">
-            <p> 글번호 : <span th:text="${post.id}"></span> </p>
-            <p> 출발지 : <span th:text="${post.startPoint}"></span> </p>
-            <p> 도착지 : <span th:text="${post.endPoint}"></span> </p>
-            <p> 날짜 : <span th:text="${post.date}"></span> </p>
-            <p> 시간 : <span th:text="${post.time}"></span> </p>
-            <p> 인원 : <span th:id="'participants-' + ${post.id}" th:text="0"></span> / <span th:text="${post.personnel}"></span></p>
-            <p> 작성자 : <span th:text="${post.writer}"></span> </p>
-            <a th:href="@{'/detail/' + ${post.id}}">
-                <button class="btn btn-danger" th:id="${post.id}" th:attr="data-id=${post.id}">참여</button>
-            </a>
-        </li>
+    <div id="loadingMessage">게시물을 불러오고 있습니다...</div>
+
+    <ul class="list-group" id="postList">
+        <!-- 초기에는 아무 게시물도 표시하지 않음 -->
     </ul>
 
     <!-- 페이지네이션 바 -->
@@ -59,6 +58,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
 <script>
+    let stompClient = null;
+
     window.addEventListener('load', function() {
         sendLocation();
         connect();
@@ -66,6 +67,8 @@
     });
 
     function sendLocation() {
+        document.getElementById('loadingMessage').style.display = 'block'; // 로딩 메시지 표시
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 const latitude = position.coords.latitude;
@@ -73,9 +76,11 @@
                 sendLocationToServer(latitude, longitude);
             }, function(error) {
                 console.error("위치 데이터 권한 허용이 필요합니다.:", error);
+                document.getElementById('loadingMessage').style.display = 'none'; // 로딩 메시지 숨김
             });
         } else {
             console.log("Geolocation is not supported by this browser.");
+            document.getElementById('loadingMessage').style.display = 'none'; // 로딩 메시지 숨김
         }
     }
 
@@ -93,30 +98,51 @@
             },
             success: function(response) {
                 console.log("Location sent to the server.");
+                updatePostList(response);
+                connect(); // Ensure the WebSocket connection is re-established after updating the post list
             },
             error: function(xhr) {
                 console.error("Error sending location data:", xhr);
+            },
+            complete: function() {
+                document.getElementById('loadingMessage').style.display = 'none'; // 로딩 메시지 숨김
             }
         });
     }
 
+    function updatePostList(posts) {
+        const postList = document.getElementById('postList');
+        postList.innerHTML = '';
+
+        posts.forEach(post => {
+            const postItem = document.createElement('li');
+            postItem.classList.add('list-group-item');
+            postItem.setAttribute('data-id', post.id);
+
+            postItem.innerHTML = `
+                <p> 글번호 : <span>${post.id}</span> </p>
+                <p> 출발지 : <span>${post.startPoint}</span> </p>
+                <p> 도착지 : <span>${post.endPoint}</span> </p>
+                <p> 날짜 : <span>${post.date}</span> </p>
+                <p> 시간 : <span>${post.time}</span> </p>
+                <p> 인원 : <span id="participants-${post.id}">0</span> / <span>${post.personnel}</span></p>
+                <p> 작성자 : <span>${post.writer}</span> </p>
+                <a href="/detail/${post.id}">
+                    <button class="btn btn-danger" data-id="${post.id}">참여</button>
+                </a>
+            `;
+
+            postList.appendChild(postItem);
+        });
+    }
+
     function connect() {
-        var stompClient = null;
-        var socket = new SockJS('/websocket-chat');
+        const socket = new SockJS('/websocket-chat');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function(frame) {
             console.log('Connected: ' + frame);
             document.querySelectorAll('.list-group-item').forEach(function(item) {
-                var postId = item.getAttribute('data-id');
-                console.log('Checking post ID:', postId);
-
-                var participantElement = document.getElementById('participants-' + postId);
-                if (participantElement) {
-                    console.log('Participant element found for post ID:', postId);
-                } else {
-                    console.log('No participant element found for post ID:', postId);
-                }
-
+                const postId = item.getAttribute('data-id');
                 stompClient.subscribe('/topic/participants/' + postId, function(message) {
                     updateParticipants(postId, JSON.parse(message.body));
                 });
@@ -125,7 +151,7 @@
     }
 
     function updateParticipants(postId, data) {
-        var participantElement = document.getElementById('participants-' + postId);
+        const participantElement = document.getElementById('participants-' + postId);
         if (participantElement && data.count !== undefined) {
             participantElement.textContent = data.count;
             console.log("Post ID " + postId + ": " + data.count + " 명 참여 중");
@@ -134,14 +160,13 @@
         }
     }
 
-    // 서버로부터 모든 채팅방의 참여자 수를 가져와 초기화하는 함수
     function loadInitialParticipants() {
         $.ajax({
             url: '/chat/participants',
             type: 'GET',
             success: function(response) {
                 Object.keys(response).forEach(function(roomId) {
-                    var participantElement = document.getElementById('participants-' + roomId);
+                    const participantElement = document.getElementById('participants-' + roomId);
                     if (participantElement) {
                         participantElement.textContent = response[roomId];
                         console.log("Updated participants for room " + roomId + " to " + response[roomId]);

@@ -45,10 +45,13 @@ public class PostController {
 
     // 사용자 위치 정보 받기
     @PostMapping("/list/location")
-    public ResponseEntity<?> receiveLocation(@RequestBody Map<String, Double> location, HttpSession session) {
+    public ResponseEntity<List<Post>> receiveLocation(@RequestBody Map<String, Double> location, HttpSession session) {
         session.setAttribute("userLocation", location);
-//        System.out.println("Received latitude: " + location.get("latitude") + ", longitude: " + location.get("longitude"));
-        return ResponseEntity.ok().build();
+        Pageable pageable = PageRequest.of(0, 5); // 첫 페이지를 반환하도록 설정
+        double lat = location.get("latitude");
+        double lon = location.get("longitude");
+        Page<Post> posts = postService.findPostsByLocation(pageable, lat, lon);
+        return ResponseEntity.ok(posts.getContent());
     }
 
     // 페이징된 게시물 조회
