@@ -13,6 +13,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,17 +25,11 @@ public class ChatService {
     private final PostRepository postRepository;
     private final SimpMessagingTemplate template;
     private Map<String, Set<String>> participants = new ConcurrentHashMap<>();
+    private Map<String, Map<String, LocalDateTime>> bannedUsers = new ConcurrentHashMap<>(); // 채팅방별 강퇴된 사용자와 강퇴 시각을 기록
 
     public ChatService(PostRepository postRepository, SimpMessagingTemplate template) {
         this.postRepository = postRepository;
         this.template = template;
-    }
-
-    // 채팅방 진입 처리: 방 존재 확인 및 인원 검사 후 입장
-    public String handleRoomEntry(Long postId, CustomUser user, Model model, HttpServletResponse response) throws IOException {
-        Post post = validateAndGetPost(postId);
-        model.addAttribute("writer", post.getWriter());
-        return checkRoomCapacityAndJoin(postId.toString(), user, response);
     }
 
     // 게시물 존재 유무 확인
@@ -133,6 +128,8 @@ public class ChatService {
         String usernameToKick = kickRequest.getUsernameToKick();
         if (participants.get(roomId).contains(requestingUser) && requestingUser.equals(kickRequest.getAdmin())) {
             leaveRoom(roomId, usernameToKick);
+            // 강퇴된 사용자 기록 및 강퇴 시간 저장
+            bannedUsers.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(usernameToKick, LocalDateTime.now());
 
             // 강퇴 알림 메시지 전송
             ChatMessage kickMessage = new ChatMessage();
@@ -150,4 +147,37 @@ public class ChatService {
             System.out.println("Kick request denied for " + requestingUser + " in " + roomId);
         }
     }
+
+    public String handleRoomEntry(Long postId, CustomUser user, Model model, HttpServletResponse response) throws IOException {
+        Post post = validateAndGetPost(postId);
+        model.addAttribute("writer", post.getWriter());
+        String roomId = postId.toString();
+
+        // 강퇴된 사용자 확인
+        if (isUserBanned(roomId, user.getUsername())) {
+            response.setContentType("text/html; charset=UTF-8");
+            PrintWriter out = response.getWriter();
+            out.println("<script>alert('강퇴된 사용자입니다. 5분 후에 다시 시도해주세요.'); history.go(-1);</script>");
+            out.flush();
+            return null;
+        }
+
+        return checkRoomCapacityAndJoin(roomId, user, response);
+    }
+
+    private boolean isUserBanned(String roomId, String username) {
+        if (!bannedUsers.containsKey(roomId)) return false;
+        LocalDateTime banTime = bannedUsers.get(roomId).get(username);
+        if (banTime == null) return false;
+
+        LocalDateTime now = LocalDateTime.now();
+        if (banTime.plusMinutes(5).isAfter(now)) {
+            return true;
+        } else {
+            // 5분이 지나면 강퇴 기록 삭제
+            bannedUsers.get(roomId).remove(username);
+            return false;
+        }
+    }
+
 }
